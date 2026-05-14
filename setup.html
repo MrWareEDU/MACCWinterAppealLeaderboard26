@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Winter Appeal Leaderboard — Setup Guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:      #09182b;
+            --card:    #0f2340;
+            --raised:  #152d52;
+            --text:    #ddeaf5;
+            --muted:   #6a8faa;
+            --dim:     #405b72;
+            --accent:  #3d8fc4;
+            --border:  rgba(255,255,255,0.07);
+            --green:   #2e9e6e;
+            --green-bg: rgba(46, 158, 110, 0.1);
+            --gold:    #c9981a;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            padding: 0 0 80px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #071524 0%, #0b1e36 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 24px;
+        }
+
+        header .inner {
+            max-width: 760px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .badge {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: rgba(61,143,196,0.12);
+            border: 1px solid rgba(61,143,196,0.2);
+            padding: 3px 8px;
+            border-radius: 3px;
+        }
+
+        header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            margin-top: 4px;
+        }
+
+        header p {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .view-link {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--accent);
+            text-decoration: none;
+            border: 1px solid rgba(61,143,196,0.3);
+            padding: 6px 14px;
+            border-radius: 5px;
+            white-space: nowrap;
+        }
+
+        .view-link:hover {
+            background: rgba(61,143,196,0.1);
+        }
+
+        .content {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 40px 24px 0;
+        }
+
+        .intro {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px 28px;
+            margin-bottom: 40px;
+        }
+
+        .intro p {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .intro p + p {
+            margin-top: 10px;
+        }
+
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .step {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .step-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(61,143,196,0.15);
+            border: 1px solid rgba(61,143,196,0.3);
+            color: #7dc4ed;
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .step-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .step-body {
+            padding: 20px 24px;
+        }
+
+        .step-body p {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+
+        .step-body p:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-body ol,
+        .step-body ul {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.7;
+            padding-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        .step-body li {
+            margin-bottom: 6px;
+        }
+
+        .step-body li:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-body strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        code {
+            font-family: 'Menlo', 'Consolas', monospace;
+            font-size: 13px;
+            background: var(--raised);
+            border: 1px solid var(--border);
+            padding: 1px 6px;
+            border-radius: 4px;
+            color: #9dd0f0;
+        }
+
+        .code-block {
+            background: var(--raised);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 14px 16px;
+            margin: 12px 0;
+            font-family: 'Menlo', 'Consolas', monospace;
+            font-size: 13px;
+            color: #9dd0f0;
+            line-height: 1.7;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        .url-example {
+            background: var(--raised);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin: 12px 0;
+            font-size: 13px;
+            line-height: 1.8;
+            word-break: break-all;
+            color: var(--muted);
+        }
+
+        .url-example .highlight {
+            background: rgba(201,152,26,0.2);
+            color: #f0c94a;
+            padding: 1px 3px;
+            border-radius: 3px;
+        }
+
+        .table-example {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 13px;
+        }
+
+        .table-example th {
+            background: var(--raised);
+            color: var(--text);
+            font-weight: 600;
+            text-align: left;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+        }
+
+        .table-example td {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            color: var(--muted);
+        }
+
+        .table-example tr:nth-child(even) td {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .note {
+            background: rgba(61,143,196,0.07);
+            border: 1px solid rgba(61,143,196,0.18);
+            border-radius: 5px;
+            padding: 11px 14px;
+            font-size: 13px;
+            color: #7dc4ed;
+            margin: 12px 0;
+            line-height: 1.6;
+        }
+
+        .done-box {
+            background: var(--green-bg);
+            border: 1px solid rgba(46,158,110,0.25);
+            border-radius: 8px;
+            padding: 22px 28px;
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .done-box h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #6dd4a8;
+            margin-bottom: 8px;
+        }
+
+        .done-box p {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .done-box a {
+            color: var(--accent);
+        }
+
+        .sheet-columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+        .sheet-col {
+            background: var(--raised);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+
+        .sheet-col .col-letter {
+            font-weight: 700;
+            color: #7dc4ed;
+            margin-bottom: 2px;
+        }
+
+        .sheet-col .col-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .sheet-col .col-example {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        @media (max-width: 640px) {
+            .content { padding: 24px 16px 0; }
+            .step-header, .step-body { padding: 14px 16px; }
+            .sheet-columns { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="inner">
+        <div>
+            <span class="badge">MACC</span>
+            <h1>Winter Appeal Leaderboard</h1>
+            <p>One-time setup guide — takes about 10 minutes</p>
+        </div>
+        <a class="view-link" href="index.html">View Leaderboard</a>
+    </div>
+</header>
+
+<div class="content">
+
+    <div class="intro">
+        <p>This page walks through the one-time technical setup. Once it is done, any staff member can update the leaderboard by simply editing a Google Sheet — no technical knowledge required.</p>
+        <p>You will need: a Google account (the school Google account is fine), and access to this GitHub repository.</p>
+    </div>
+
+    <div class="steps">
+
+        <!-- Step 1 -->
+        <div class="step">
+            <div class="step-header">
+                <div class="step-num">1</div>
+                <div class="step-title">Create the Google Sheet</div>
+            </div>
+            <div class="step-body">
+                <p>Go to <strong>sheets.google.com</strong> and create a new spreadsheet. Name it something clear, such as <strong>Winter Appeal 2026 — Leaderboard</strong>.</p>
+                <p>Set up the first row as column headings, exactly as shown below. Spelling and capitalisation must match.</p>
+
+                <div class="sheet-columns">
+                    <div class="sheet-col">
+                        <div class="col-letter">Column A</div>
+                        <div class="col-name">Care Group</div>
+                        <div class="col-example">e.g. 9A, 10C, 11B</div>
+                    </div>
+                    <div class="sheet-col">
+                        <div class="col-letter">Column B</div>
+                        <div class="col-name">Year Group</div>
+                        <div class="col-example">e.g. Year 9, Year 10</div>
+                    </div>
+                    <div class="sheet-col">
+                        <div class="col-letter">Column C</div>
+                        <div class="col-name">Boxes</div>
+                        <div class="col-example">Numbers only — e.g. 14</div>
+                    </div>
+                </div>
+
+                <p>Then add a row for each Care Group. Example:</p>
+
+                <table class="table-example">
+                    <thead>
+                        <tr>
+                            <th>Care Group</th>
+                            <th>Year Group</th>
+                            <th>Boxes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>9A</td><td>Year 9</td><td>0</td></tr>
+                        <tr><td>9B</td><td>Year 9</td><td>0</td></tr>
+                        <tr><td>10A</td><td>Year 10</td><td>0</td></tr>
+                        <tr><td>10B</td><td>Year 10</td><td>0</td></tr>
+                        <tr><td>11A</td><td>Year 11</td><td>0</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="note">Start all box counts at 0. The leaderboard will update as staff enter real numbers during the appeal.</div>
+
+                <p>To protect the structure, select columns A and B, right-click, choose <strong>Protect range</strong>, and restrict editing to yourself. This prevents accidental changes to names.</p>
+            </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step">
+            <div class="step-header">
+                <div class="step-num">2</div>
+                <div class="step-title">Publish the Sheet to the web</div>
+            </div>
+            <div class="step-body">
+                <p>The leaderboard reads the Sheet as a public file. You need to publish it — this does <strong>not</strong> share the Sheet with anyone or give anyone edit access. It only makes the data readable by the leaderboard page.</p>
+                <ol>
+                    <li>In the Sheet, click <strong>File</strong> in the top menu</li>
+                    <li>Click <strong>Share</strong>, then <strong>Publish to web</strong></li>
+                    <li>Under the first dropdown, select <strong>Sheet1</strong> (or the name of your tab)</li>
+                    <li>Under the second dropdown, select <strong>Comma-separated values (.csv)</strong></li>
+                    <li>Click <strong>Publish</strong>, then confirm with <strong>OK</strong></li>
+                </ol>
+                <div class="note">Leave the page open — you will need the Sheet ID in the next step.</div>
+            </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step">
+            <div class="step-header">
+                <div class="step-num">3</div>
+                <div class="step-title">Copy the Sheet ID</div>
+            </div>
+            <div class="step-body">
+                <p>Look at the URL in your browser while the Sheet is open. The Sheet ID is the long string of letters and numbers between <code>/d/</code> and <code>/edit</code>.</p>
+
+                <div class="url-example">
+                    docs.google.com/spreadsheets/d/<span class="highlight">1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms</span>/edit#gid=0
+                </div>
+
+                <p>Copy just the highlighted part. You will paste it in the next step.</p>
+            </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step">
+            <div class="step-header">
+                <div class="step-num">4</div>
+                <div class="step-title">Paste the Sheet ID into config.js</div>
+            </div>
+            <div class="step-body">
+                <p>Open the file <code>js/config.js</code> in this repository. Find the line that reads:</p>
+
+                <div class="code-block">    SHEET_ID: 'YOUR_GOOGLE_SHEET_ID_HERE',</div>
+
+                <p>Replace <code>YOUR_GOOGLE_SHEET_ID_HERE</code> with the ID you copied. It should look like:</p>
+
+                <div class="code-block">    SHEET_ID: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms',</div>
+
+                <p>Save the file and commit the change to the repository.</p>
+            </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="step">
+            <div class="step-header">
+                <div class="step-num">5</div>
+                <div class="step-title">Enable GitHub Pages</div>
+            </div>
+            <div class="step-body">
+                <p>This publishes the leaderboard as a live website at a permanent URL.</p>
+                <ol>
+                    <li>Go to the repository on GitHub</li>
+                    <li>Click <strong>Settings</strong> (top menu)</li>
+                    <li>In the left sidebar, click <strong>Pages</strong></li>
+                    <li>Under <strong>Source</strong>, select <strong>Deploy from a branch</strong></li>
+                    <li>Choose the <strong>main</strong> branch and the <strong>/ (root)</strong> folder</li>
+                    <li>Click <strong>Save</strong></li>
+                </ol>
+                <p>After a minute or two, GitHub will show the public URL at the top of the Pages settings. It will look like: <code>https://mrwareedu.github.io/maccwinterappealleaderboard26/</code></p>
+                <div class="note">Share this URL with staff for the admin sheet link, and with the AV team for the assembly display. The same URL works for both — the page is viewable by anyone.</div>
+            </div>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="step">
+            <div class="step-header">
+                <div class="step-num">6</div>
+                <div class="step-title">Share the Google Sheet with admin staff</div>
+            </div>
+            <div class="step-body">
+                <p>Anyone who needs to update box counts needs edit access to the Google Sheet — not the website.</p>
+                <ol>
+                    <li>In the Sheet, click the <strong>Share</strong> button (top right)</li>
+                    <li>Enter the email address of each staff member who will update scores</li>
+                    <li>Set their permission to <strong>Editor</strong></li>
+                    <li>Click <strong>Send</strong></li>
+                </ol>
+                <p>They will receive an email with a link to the Sheet. Bookmark it, or find it any time in Google Drive. To update a score, they simply click the number in column C and type the new total.</p>
+                <p>Changes appear on the leaderboard within 30 seconds — no button to press, no page to reload.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="done-box">
+        <h2>Setup complete</h2>
+        <p>The leaderboard is live. Share the GitHub Pages URL with staff and the assembly team.<br>
+        To update scores at any time, edit column C in the Google Sheet.<br>
+        <a href="index.html">Open the leaderboard</a> to confirm everything is working.</p>
+    </div>
+
+</div>
+
+</body>
+</html>

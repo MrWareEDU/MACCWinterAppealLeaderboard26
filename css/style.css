@@ -1,0 +1,491 @@
+/* ============================================================
+   Base
+============================================================ */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg:           #09182b;
+    --bg-card:      #0f2340;
+    --bg-elevated:  #152d52;
+    --text:         #ddeaf5;
+    --text-muted:   #6a8faa;
+    --text-dim:     #405b72;
+    --accent:       #3d8fc4;
+    --border:       rgba(255, 255, 255, 0.06);
+    --gold:         #c9981a;
+    --gold-light:   #f0c94a;
+    --gold-bg:      rgba(201, 152, 26, 0.08);
+    --silver:       #8099ac;
+    --silver-light: #b8cdd8;
+    --silver-bg:    rgba(128, 153, 172, 0.07);
+    --bronze:       #b06b2a;
+    --bronze-light: #d8925a;
+    --bronze-bg:    rgba(176, 107, 42, 0.07);
+    --radius:       6px;
+    --header-h:     72px;
+    --footer-h:     44px;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ============================================================
+   Header
+============================================================ */
+
+.site-header {
+    background: linear-gradient(180deg, #071524 0%, #0b1e36 100%);
+    border-bottom: 1px solid var(--border);
+    height: var(--header-h);
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.header-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+}
+
+.school-name {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(61, 143, 196, 0.12);
+    border: 1px solid rgba(61, 143, 196, 0.2);
+    padding: 3px 8px;
+    border-radius: 3px;
+}
+
+.appeal-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+}
+
+.appeal-subtitle {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   Year Group Filters
+============================================================ */
+
+.year-filters {
+    display: flex;
+    gap: 4px;
+}
+
+.filter-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+}
+
+.filter-btn:hover {
+    background: var(--bg-elevated);
+    color: var(--text);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.filter-btn.active {
+    background: rgba(61, 143, 196, 0.15);
+    border-color: rgba(61, 143, 196, 0.35);
+    color: #7dc4ed;
+}
+
+/* ============================================================
+   Assembly View Button
+============================================================ */
+
+.btn-assembly {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 14px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+}
+
+.btn-assembly:hover {
+    background: var(--bg-elevated);
+    color: var(--text);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* ============================================================
+   Main content
+============================================================ */
+
+.main-content {
+    flex: 1;
+    max-width: 960px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 28px 24px 40px;
+}
+
+/* ============================================================
+   Status states
+============================================================ */
+
+.status-state {
+    padding: 48px 0;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.status-error {
+    color: #d07070;
+}
+
+.error-detail {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--text-dim);
+}
+
+/* ============================================================
+   Leaderboard
+============================================================ */
+
+.leaderboard {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.leaderboard-item {
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    align-items: center;
+    gap: 0 16px;
+    padding: 14px 18px 14px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    border-left-width: 3px;
+    border-left-color: transparent;
+    transition: background 0.12s;
+}
+
+.leaderboard-item:hover {
+    background: var(--bg-elevated);
+}
+
+.leaderboard-item.gold {
+    background: var(--gold-bg);
+    border-color: rgba(201, 152, 26, 0.18);
+    border-left-color: var(--gold);
+}
+
+.leaderboard-item.silver {
+    background: var(--silver-bg);
+    border-color: rgba(128, 153, 172, 0.16);
+    border-left-color: var(--silver);
+}
+
+.leaderboard-item.bronze {
+    background: var(--bronze-bg);
+    border-color: rgba(176, 107, 42, 0.16);
+    border-left-color: var(--bronze);
+}
+
+/* Rank number */
+
+.rank {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.leaderboard-item.gold   .rank { color: var(--gold-light); }
+.leaderboard-item.silver .rank { color: var(--silver-light); }
+.leaderboard-item.bronze .rank { color: var(--bronze-light); }
+
+/* Group info */
+
+.group-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.group-name {
+    font-size: 17px;
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.year-tag {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-dim);
+    letter-spacing: 0.03em;
+}
+
+/* Progress area — spans full width below name and count */
+
+.leaderboard-item {
+    grid-template-columns: 48px 1fr auto;
+    grid-template-rows: auto auto;
+}
+
+.group-info {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.box-count {
+    grid-column: 3;
+    grid-row: 1;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    text-align: right;
+    align-self: center;
+}
+
+.rank {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    align-self: center;
+}
+
+.progress-track {
+    grid-column: 2 / 4;
+    grid-row: 2;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--accent);
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    min-width: 2px;
+}
+
+.leaderboard-item.gold   .progress-fill { background: var(--gold); }
+.leaderboard-item.silver .progress-fill { background: var(--silver); }
+.leaderboard-item.bronze .progress-fill { background: var(--bronze-light); }
+
+/* Tied rank indicator */
+
+.tied-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-dim);
+    letter-spacing: 0.04em;
+    margin-top: 1px;
+}
+
+/* Empty / no data */
+
+.leaderboard-empty {
+    text-align: center;
+    padding: 60px 0;
+    color: var(--text-muted);
+    font-size: 14px;
+    list-style: none;
+}
+
+/* ============================================================
+   Footer
+============================================================ */
+
+.site-footer {
+    text-align: center;
+    padding: 12px 24px;
+    font-size: 12px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.footer-sep {
+    opacity: 0.3;
+}
+
+/* ============================================================
+   Assembly (fullscreen) mode
+============================================================ */
+
+.assembly-mode .site-header {
+    height: 88px;
+}
+
+.assembly-mode .appeal-title {
+    font-size: 26px;
+}
+
+.assembly-mode .header-controls {
+    display: none;
+}
+
+.assembly-mode .main-content {
+    padding: 32px 48px 48px;
+    max-width: 1200px;
+}
+
+.assembly-mode .leaderboard {
+    gap: 8px;
+}
+
+.assembly-mode .leaderboard-item {
+    padding: 18px 24px 18px 20px;
+}
+
+.assembly-mode .rank {
+    font-size: 30px;
+}
+
+.assembly-mode .group-name {
+    font-size: 22px;
+}
+
+.assembly-mode .box-count {
+    font-size: 20px;
+}
+
+.assembly-mode .progress-track {
+    height: 7px;
+    margin-top: 10px;
+}
+
+.assembly-mode .site-footer {
+    font-size: 13px;
+    padding: 14px 24px;
+}
+
+/* ============================================================
+   Responsive
+============================================================ */
+
+@media (max-width: 640px) {
+    :root {
+        --header-h: auto;
+    }
+
+    .site-header {
+        height: auto;
+    }
+
+    .header-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px 18px;
+        gap: 12px;
+    }
+
+    .header-controls {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .main-content {
+        padding: 18px 14px 32px;
+    }
+
+    .leaderboard-item {
+        padding: 12px 14px 12px 12px;
+        gap: 0 12px;
+    }
+
+    .rank {
+        font-size: 18px;
+    }
+
+    .group-name {
+        font-size: 15px;
+    }
+
+    .box-count {
+        font-size: 13px;
+    }
+}
