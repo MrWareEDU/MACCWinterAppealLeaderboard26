@@ -16,9 +16,9 @@ const CONFIG = {
     // ----------------------------------------------------------
     SHEET_ID: 'YOUR_GOOGLE_SHEET_ID_HERE',
 
-    // The tab GID. Leave as '0' if you are using the first tab.
-    // If you use a different tab, find the gid= value in the URL
-    // when that tab is open.
+    // The GID of the Leaderboard tab (NOT the Form Responses tab).
+    // Find it in the Sheet URL when the Leaderboard tab is open:
+    //   ...edit#gid= >>> THIS NUMBER <<<
     SHEET_GID: '0',
 
     // ----------------------------------------------------------
