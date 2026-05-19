@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    // ── State ────────────────────────────────────────────────
+    // ── State ────────────────────────────────────────────
 
     const state = {
         rows: [],
@@ -10,7 +10,7 @@
         firstLoad: true,
     };
 
-    // ── Data fetching ────────────────────────────────────────
+    // ── Data fetching ──────────────────────────────────────
 
     function sheetURL() {
         return (
@@ -29,7 +29,7 @@
         return parseCSV(text);
     }
 
-    // ── CSV parser ───────────────────────────────────────────
+    // ── CSV parser ───────────────────────────────────────
 
     function parseCSVLine(line) {
         const fields = [];
@@ -89,7 +89,7 @@
         });
     }
 
-    // ── Filtering ────────────────────────────────────────────
+    // ── Filtering ──────────────────────────────────────────
 
     function filteredRows() {
         if (state.activeFilter === 'all') return state.rows;
@@ -110,7 +110,7 @@
         return groups.sort();
     }
 
-    // ── Rendering ────────────────────────────────────────────
+    // ── Rendering ──────────────────────────────────────────
 
     function renderHeader() {
         const school = document.getElementById('schoolName');
@@ -167,7 +167,6 @@
                              : row.rank === 2 ? ' silver'
                              : row.rank === 3 ? ' bronze'
                              : '';
-            const boxWord   = row.boxes === 1 ? 'box' : 'boxes';
 
             return (
                 '<li class="leaderboard-item' + medalClass + '">' +
@@ -178,7 +177,7 @@
                             ? '<span class="year-tag">' + escapeHTML(row.yearGroup) + '</span>'
                             : '') +
                     '</div>' +
-                    '<span class="box-count">' + row.boxes + ' ' + boxWord + '</span>' +
+                    '<span class="box-count">' + row.boxes + ' donation' + (row.boxes === 1 ? '' : 's') + '</span>' +
                     '<div class="progress-track">' +
                         '<div class="progress-fill" style="width:' + pct + '%"></div>' +
                     '</div>' +
@@ -233,7 +232,7 @@
         }
     }
 
-    // ── Assembly view ────────────────────────────────────────
+    // ── Assembly view ──────────────────────────────────────
 
     function initAssemblyButton() {
         const btn = document.getElementById('btnAssembly');
