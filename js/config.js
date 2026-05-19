@@ -14,12 +14,12 @@ const CONFIG = {
     //  Find it in the Sheet URL:
     //    docs.google.com/spreadsheets/d/ >>> THIS PART <<< /edit
     // ----------------------------------------------------------
-    SHEET_ID: 'YOUR_GOOGLE_SHEET_ID_HERE',
+    SHEET_ID: 'e/2PACX-1vSOmDnxpK9XwyzgQVLvoGacSFfqBngxeQofQ2dS-aZZHeDbSFzvYkdhPBAc0p6XPjLR735OnilHHYjZ',
 
     // The GID of the Leaderboard tab (NOT the Form Responses tab).
     // Find it in the Sheet URL when the Leaderboard tab is open:
     //   ...edit#gid= >>> THIS NUMBER <<<
-    SHEET_GID: '0',
+    SHEET_GID: '1500628005',
 
     // ----------------------------------------------------------
     //  Display
