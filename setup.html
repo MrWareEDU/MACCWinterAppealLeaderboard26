@@ -428,9 +428,9 @@
                 </table>
 
                 <p>In cell <strong>C2</strong>, paste this formula exactly:</p>
-                <div class="code-block">=IFERROR(QUERY('Form Responses 1'!A:C,"SELECT C WHERE B='"&A2&"' ORDER BY A DESC LIMIT 1",0),0)</div>
+                <div class="code-block">=IFERROR(INDEX('Form Responses 1'!C:C,MATCH(MAXIFS('Form Responses 1'!A:A,'Form Responses 1'!B:B,A2),'Form Responses 1'!A:A,0)),0)</div>
                 <p>Then drag the formula down to fill C3, C4, and so on — one cell per care group row.</p>
-                <div class="note">This formula finds the most recent form submission for each care group and shows that number. If no submission has been made yet, it shows 0.</div>
+                <div class="note">This formula finds the most recent form submission for each care group and shows that number. If no submission has been made yet, it shows 0. Make sure the tab is named exactly <strong>Form Responses 1</strong> (capital R) — Google Forms creates it this way automatically.</div>
             </div>
         </div>
 
