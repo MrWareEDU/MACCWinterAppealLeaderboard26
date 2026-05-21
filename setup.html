@@ -298,7 +298,7 @@
 
         .sheet-columns {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 8px;
             margin: 12px 0;
         }
@@ -351,7 +351,7 @@
 <div class="content">
 
     <div class="intro">
-        <p>This page walks through the one-time technical setup. Once it is done, any staff member can update the leaderboard by simply editing a Google Sheet — no technical knowledge required.</p>
+        <p>This page walks through the one-time technical setup. Once it is done, care teachers submit box counts via a simple Google Form — no spreadsheet access, no logins, works on any phone or computer.</p>
         <p>You will need: a Google account (the school Google account is fine), and access to this GitHub repository.</p>
     </div>
 
@@ -361,52 +361,22 @@
         <div class="step">
             <div class="step-header">
                 <div class="step-num">1</div>
-                <div class="step-title">Create the Google Sheet</div>
+                <div class="step-title">Create the Google Form</div>
             </div>
             <div class="step-body">
-                <p>Go to <strong>sheets.google.com</strong> and create a new spreadsheet. Name it something clear, such as <strong>Winter Appeal 2026 — Leaderboard</strong>.</p>
-                <p>Set up the first row as column headings, exactly as shown below. Spelling and capitalisation must match.</p>
-
-                <div class="sheet-columns">
-                    <div class="sheet-col">
-                        <div class="col-letter">Column A</div>
-                        <div class="col-name">Care Group</div>
-                        <div class="col-example">e.g. 9A, 10C, 11B</div>
-                    </div>
-                    <div class="sheet-col">
-                        <div class="col-letter">Column B</div>
-                        <div class="col-name">Year Group</div>
-                        <div class="col-example">e.g. Year 9, Year 10</div>
-                    </div>
-                    <div class="sheet-col">
-                        <div class="col-letter">Column C</div>
-                        <div class="col-name">Boxes</div>
-                        <div class="col-example">Numbers only — e.g. 14</div>
-                    </div>
-                </div>
-
-                <p>Then add a row for each Care Group. Example:</p>
-
-                <table class="table-example">
-                    <thead>
-                        <tr>
-                            <th>Care Group</th>
-                            <th>Year Group</th>
-                            <th>Boxes</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>9A</td><td>Year 9</td><td>0</td></tr>
-                        <tr><td>9B</td><td>Year 9</td><td>0</td></tr>
-                        <tr><td>10A</td><td>Year 10</td><td>0</td></tr>
-                        <tr><td>10B</td><td>Year 10</td><td>0</td></tr>
-                        <tr><td>11A</td><td>Year 11</td><td>0</td></tr>
-                    </tbody>
-                </table>
-
-                <div class="note">Start all box counts at 0. The leaderboard will update as staff enter real numbers during the appeal.</div>
-
-                <p>To protect the structure, select columns A and B, right-click, choose <strong>Protect range</strong>, and restrict editing to yourself. This prevents accidental changes to names.</p>
+                <p>Go to <strong>forms.google.com</strong> and click the blank form (<strong>+</strong>). Name it <strong>Winter Appeal 2026 — Box Count Update</strong>.</p>
+                <p>Add exactly two questions:</p>
+                <ol>
+                    <li>
+                        <strong>Question 1 — Care Group</strong><br>
+                        Type: <strong>Dropdown</strong>. Add one option per care group (e.g. 9A, 9B, 10A, 10B, 11A…). Mark as required.
+                    </li>
+                    <li>
+                        <strong>Question 2 — Total donations collected so far</strong><br>
+                        Type: <strong>Short answer</strong>. Click the three-dot menu on the question and choose <strong>Response validation</strong> → Number → Greater than or equal to → 0. Mark as required.
+                    </li>
+                </ol>
+                <div class="note">Teachers submit the <strong>running total</strong>, not just new donations since last time. The leaderboard always shows the most recent submission per care group, so totals are always accurate.</div>
             </div>
         </div>
 
@@ -414,18 +384,18 @@
         <div class="step">
             <div class="step-header">
                 <div class="step-num">2</div>
-                <div class="step-title">Publish the Sheet to the web</div>
+                <div class="step-title">Link the form to a Google Sheet</div>
             </div>
             <div class="step-body">
-                <p>The leaderboard reads the Sheet as a public file. You need to publish it — this does <strong>not</strong> share the Sheet with anyone or give anyone edit access. It only makes the data readable by the leaderboard page.</p>
+                <p>Responses need to land in a Sheet so the leaderboard can read them.</p>
                 <ol>
-                    <li>In the Sheet, click <strong>File</strong> in the top menu</li>
-                    <li>Click <strong>Share</strong>, then <strong>Publish to web</strong></li>
-                    <li>Under the first dropdown, select <strong>Sheet1</strong> (or the name of your tab)</li>
-                    <li>Under the second dropdown, select <strong>Comma-separated values (.csv)</strong></li>
-                    <li>Click <strong>Publish</strong>, then confirm with <strong>OK</strong></li>
+                    <li>In the Form, click the <strong>Responses</strong> tab at the top</li>
+                    <li>Click the green Sheets icon (or the three-dot menu → <strong>Select response destination</strong>)</li>
+                    <li>Choose <strong>Create a new spreadsheet</strong> and name it <strong>Winter Appeal 2026 — Data</strong></li>
+                    <li>Click <strong>Create</strong></li>
                 </ol>
-                <div class="note">Leave the page open — you will need the Sheet ID in the next step.</div>
+                <p>Google will open the Sheet. It will have one tab called <strong>Form responses</strong> (lowercase r) with four columns: Timestamp, Email address, Care Group, and your donations question.</p>
+                <div class="note">Do not rename or move this tab — the formula in the next step depends on it being named exactly <strong>Form responses</strong>.</div>
             </div>
         </div>
 
@@ -433,16 +403,36 @@
         <div class="step">
             <div class="step-header">
                 <div class="step-num">3</div>
-                <div class="step-title">Copy the Sheet ID</div>
+                <div class="step-title">Create the Leaderboard tab</div>
             </div>
             <div class="step-body">
-                <p>Look at the URL in your browser while the Sheet is open. The Sheet ID is the long string of letters and numbers between <code>/d/</code> and <code>/edit</code>.</p>
+                <p>The leaderboard needs a clean tab showing one row per care group with the most recent donation count. Add a new tab to the Sheet:</p>
+                <ol>
+                    <li>Click the <strong>+</strong> button at the bottom left of the Sheet to add a new tab</li>
+                    <li>Double-click the new tab and rename it <strong>Leaderboard</strong></li>
+                    <li>In row 1, type these four headings exactly: <strong>Care Group</strong> (A1), <strong>Year Group</strong> (B1), <strong>Donations</strong> (C1), <strong>Previous Total</strong> (D1)</li>
+                    <li>From row 2 down, fill in column A with each care group name and column B with its year group — one row per group</li>
+                </ol>
 
-                <div class="url-example">
-                    docs.google.com/spreadsheets/d/<span class="highlight">1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms</span>/edit#gid=0
-                </div>
+                <table class="table-example">
+                    <thead>
+                        <tr><th>Care Group</th><th>Year Group</th><th>Donations</th><th>Previous Total</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>07HRM1</td><td>Year 7</td><td><em>(formula)</em></td><td><em>(formula)</em></td></tr>
+                        <tr><td>07HRM2</td><td>Year 7</td><td><em>(formula)</em></td><td><em>(formula)</em></td></tr>
+                        <tr><td>08HRM1</td><td>Year 8</td><td><em>(formula)</em></td><td><em>(formula)</em></td></tr>
+                        <tr><td>08HRM2</td><td>Year 8</td><td><em>(formula)</em></td><td><em>(formula)</em></td></tr>
+                        <tr><td>09HRM1</td><td>Year 9</td><td><em>(formula)</em></td><td><em>(formula)</em></td></tr>
+                    </tbody>
+                </table>
 
-                <p>Copy just the highlighted part. You will paste it in the next step.</p>
+                <p>In cell <strong>C2</strong>, paste this formula to get the most recent donation total for that care group:</p>
+                <div class="code-block">=IFERROR(INDEX('Form responses'!D:D,MATCH(MAXIFS('Form responses'!A:A,'Form responses'!C:C,A2),'Form responses'!A:A,0)),0)</div>
+                <p>In cell <strong>D2</strong>, paste this formula to get the <em>second</em> most recent submission (used by the leaderboard to show “On Fire” and “Biggest Jump” since the last count):</p>
+                <div class="code-block">=IFERROR(INDEX('Form responses'!D:D,MATCH(LARGE(FILTER('Form responses'!A:A,'Form responses'!C:C=A2),2),'Form responses'!A:A,0)),"")</div>
+                <p>Drag both formulas down to fill their columns — one cell per care group row.</p>
+                <div class="note">Column B in <strong>Form responses</strong> is Email address, so Care Group is column C and the donation count is column D. The single quotes around the tab name are required because it contains a space. If no submission has been made yet for a care group, column C shows 0 and column D is blank.</div>
             </div>
         </div>
 
@@ -450,18 +440,18 @@
         <div class="step">
             <div class="step-header">
                 <div class="step-num">4</div>
-                <div class="step-title">Paste the Sheet ID into config.js</div>
+                <div class="step-title">Publish the Leaderboard tab to the web</div>
             </div>
             <div class="step-body">
-                <p>Open the file <code>js/config.js</code> in this repository. Find the line that reads:</p>
-
-                <div class="code-block">    SHEET_ID: 'YOUR_GOOGLE_SHEET_ID_HERE',</div>
-
-                <p>Replace <code>YOUR_GOOGLE_SHEET_ID_HERE</code> with the ID you copied. It should look like:</p>
-
-                <div class="code-block">    SHEET_ID: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms',</div>
-
-                <p>Save the file and commit the change to the repository.</p>
+                <p>The leaderboard app reads the Sheet as a public file. Publishing it does <strong>not</strong> give anyone edit access — it only makes the data readable by the leaderboard page.</p>
+                <ol>
+                    <li>Make sure you are on the <strong>Leaderboard</strong> tab</li>
+                    <li>Click <strong>File</strong> → <strong>Share</strong> → <strong>Publish to web</strong></li>
+                    <li>Under the first dropdown, select <strong>Leaderboard</strong></li>
+                    <li>Under the second dropdown, select <strong>Comma-separated values (.csv)</strong></li>
+                    <li>Click <strong>Publish</strong>, then confirm with <strong>OK</strong></li>
+                </ol>
+                <div class="note">Leave the Sheet open — you need the Sheet ID and tab GID in the next step.</div>
             </div>
         </div>
 
@@ -469,6 +459,44 @@
         <div class="step">
             <div class="step-header">
                 <div class="step-num">5</div>
+                <div class="step-title">Copy the Sheet ID and tab GID</div>
+            </div>
+            <div class="step-body">
+                <p>With the <strong>Leaderboard</strong> tab open, look at the URL in your browser. It contains two values you need:</p>
+
+                <div class="url-example">
+                    docs.google.com/spreadsheets/d/<span class="highlight">1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms</span>/edit#gid=<span class="highlight">839652104</span>
+                </div>
+
+                <ul>
+                    <li>The long string after <code>/d/</code> and before <code>/edit</code> — this is the <strong>Sheet ID</strong></li>
+                    <li>The number after <code>gid=</code> — this is the <strong>tab GID</strong> for the Leaderboard tab</li>
+                </ul>
+                <p>Copy both values. You will paste them into <code>config.js</code> in the next step.</p>
+            </div>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="step">
+            <div class="step-header">
+                <div class="step-num">6</div>
+                <div class="step-title">Update config.js</div>
+            </div>
+            <div class="step-body">
+                <p>Open the file <code>js/config.js</code> in this repository and update the two lines shown below:</p>
+
+                <div class="code-block">    SHEET_ID: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms',
+    SHEET_GID: '839652104',</div>
+
+                <p>Replace both values with your own Sheet ID and Leaderboard tab GID from the previous step. Save the file and commit the change to the repository.</p>
+                <div class="note">The GID must point to the <strong>Leaderboard</strong> tab — not the Form responses tab. If the leaderboard page shows no data, this is the most likely cause.</div>
+            </div>
+        </div>
+
+        <!-- Step 7 -->
+        <div class="step">
+            <div class="step-header">
+                <div class="step-num">7</div>
                 <div class="step-title">Enable GitHub Pages</div>
             </div>
             <div class="step-body">
@@ -481,27 +509,28 @@
                     <li>Choose the <strong>main</strong> branch and the <strong>/ (root)</strong> folder</li>
                     <li>Click <strong>Save</strong></li>
                 </ol>
-                <p>After a minute or two, GitHub will show the public URL at the top of the Pages settings. It will look like: <code>https://mrwareedu.github.io/maccwinterappealleaderboard26/</code></p>
-                <div class="note">Share this URL with staff for the admin sheet link, and with the AV team for the assembly display. The same URL works for both — the page is viewable by anyone.</div>
+                <p>After a minute or two, GitHub will show the live URL at the top of the Pages settings — something like <code>https://mrwareedu.github.io/maccwinterappealleaderboard26/</code>.</p>
+                <div class="note">This URL is the public leaderboard. Share it with the AV team for assembly display. It requires no login and works on any device.</div>
             </div>
         </div>
 
-        <!-- Step 6 -->
+        <!-- Step 8 -->
         <div class="step">
             <div class="step-header">
-                <div class="step-num">6</div>
-                <div class="step-title">Share the Google Sheet with admin staff</div>
+                <div class="step-num">8</div>
+                <div class="step-title">Share the form with care teachers</div>
             </div>
             <div class="step-body">
-                <p>Anyone who needs to update box counts needs edit access to the Google Sheet — not the website.</p>
+                <p>Care teachers submit donation counts through the Google Form — no Sheet access needed.</p>
                 <ol>
-                    <li>In the Sheet, click the <strong>Share</strong> button (top right)</li>
-                    <li>Enter the email address of each staff member who will update scores</li>
-                    <li>Set their permission to <strong>Editor</strong></li>
-                    <li>Click <strong>Send</strong></li>
+                    <li>Open the Google Form</li>
+                    <li>Click the <strong>Send</strong> button (top right)</li>
+                    <li>Click the link icon to get the shareable URL. Tick <strong>Shorten URL</strong> for a cleaner link</li>
+                    <li>Share the link via email, staff portal, or print it as a QR code</li>
                 </ol>
-                <p>They will receive an email with a link to the Sheet. Bookmark it, or find it any time in Google Drive. To update a score, they simply click the number in column C and type the new total.</p>
-                <p>Changes appear on the leaderboard within 30 seconds — no button to press, no page to reload.</p>
+                <p>To get a QR code: click the three-dot menu next to Send, or use any free QR code generator with the form URL. Print and post it in the staffroom or on each classroom door.</p>
+                <p>Teachers can submit as many times as they like. Only the most recent submission per care group is used — so submitting a corrected total simply replaces the previous one on the leaderboard.</p>
+                <div class="note">The form does not require a Google account by default. If you want to restrict submissions to school accounts only, open the form settings and enable <strong>Restrict to users in your organisation</strong>.</div>
             </div>
         </div>
 
@@ -509,8 +538,7 @@
 
     <div class="done-box">
         <h2>Setup complete</h2>
-        <p>The leaderboard is live. Share the GitHub Pages URL with staff and the assembly team.<br>
-        To update scores at any time, edit column C in the Google Sheet.<br>
+        <p>The leaderboard is live. Care teachers submit counts via the Google Form, and the leaderboard updates within 30 seconds.<br>
         <a href="index.html">Open the leaderboard</a> to confirm everything is working.</p>
     </div>
 
