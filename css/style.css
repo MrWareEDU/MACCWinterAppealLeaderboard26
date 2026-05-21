@@ -490,6 +490,21 @@ body {
     opacity: 0.3;
 }
 
+.btn-reset {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.15s;
+}
+
+.btn-reset:hover {
+    color: var(--accent);
+}
+
 /* ============================================================
    Animations
 ============================================================ */
@@ -822,8 +837,7 @@ body {
     }
 
     .header-controls {
-        width: 100%;
-        flex-wrap: wrap;
+        width: 100%;        flex-wrap: wrap;
     }
 
     .main-content {
