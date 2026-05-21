@@ -217,8 +217,12 @@ body {
 }
 
 /* ============================================================
-   Assembly stats panel (hidden by default, shown in assembly mode)
+   Assembly layout (hidden by default, shown in assembly mode)
 ============================================================ */
+
+.assembly-layout {
+    display: none;
+}
 
 .assembly-panel {
     display: none;
@@ -514,17 +518,17 @@ body {
 }
 
 .assembly-mode .site-header {
-    height: 96px;
+    height: 72px;
     background: linear-gradient(180deg, #030d1a 0%, #071628 100%);
 }
 
 .assembly-mode .appeal-title {
-    font-size: 32px;
+    font-size: 26px;
     letter-spacing: -0.02em;
 }
 
 .assembly-mode .appeal-subtitle {
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .assembly-mode .header-controls {
@@ -532,118 +536,269 @@ body {
 }
 
 .assembly-mode .main-content {
-    padding: 28px 56px 56px;
-    max-width: 1440px;
+    max-width: none;
+    padding: 12px 20px;
+    height: calc(100vh - 72px - 40px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-/* Stats panel */
+/* 3-column assembly layout */
 
-.assembly-mode .assembly-panel {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-bottom: 28px;
+.assembly-mode .assembly-layout {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    flex: 1;
+    min-height: 0;
 }
 
-/* Leaderboard */
+/* Normal leaderboard hidden in assembly mode */
 
 .assembly-mode .leaderboard {
-    gap: 10px;
+    display: none !important;
 }
 
-.assembly-mode .leaderboard-item {
-    padding: 20px 26px 20px 22px;
-    border-left-width: 4px;
+/* ── Stats panel (left column) ──────────────────────── */
+
+.assembly-mode .assembly-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    width: 178px;
+    flex-shrink: 0;
 }
 
-/* Top 3 get more drama */
+.assembly-mode .stat-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px 14px;
+}
 
-.assembly-mode .leaderboard-item.gold {
-    padding: 26px 32px 26px 26px;
+.assembly-mode .stat-value {
+    font-size: 28px;
+    letter-spacing: -0.02em;
+}
+
+.assembly-mode .stat-label {
+    font-size: 9px;
+    margin-top: 4px;
+}
+
+.assembly-mode .stat-detail {
+    font-size: 10px;
+    margin-top: 3px;
+}
+
+/* ── Podium (center column) ──────────────────────── */
+
+.assembly-mode .assembly-podium {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.podium-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 7px;
+    padding: 16px 14px 22px;
+    border-radius: 14px 14px 0 0;
+    border: 2px solid transparent;
+    border-bottom: none;
+    text-align: center;
+    min-width: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.podium-block.pos-1 {
+    flex: 0 0 36%;
+    background: var(--gold-bg);
+    border-color: var(--gold);
     animation: gold-pulse 3s ease-in-out infinite;
 }
 
-/* On fire glow */
+.podium-block.pos-2 {
+    flex: 0 0 30%;
+    background: var(--silver-bg);
+    border-color: var(--silver);
+    margin-top: 14%;
+}
 
-.assembly-mode .leaderboard-item.on-fire {
+.podium-block.pos-3 {
+    flex: 0 0 26%;
+    background: var(--bronze-bg);
+    border-color: var(--bronze-light);
+    margin-top: 24%;
+}
+
+.podium-block.on-fire {
     animation: fire-glow 2s ease-in-out infinite;
 }
 
-.assembly-mode .leaderboard-item.gold.on-fire {
+.podium-block.pos-1.on-fire {
     animation: fire-glow 2s ease-in-out infinite, gold-pulse 3s ease-in-out infinite;
 }
 
-/* Rank */
-
-.assembly-mode .rank {
-    font-size: 38px;
-    width: 60px;
+.podium-medal {
+    font-size: 42px;
+    line-height: 1;
+    flex-shrink: 0;
 }
 
-.assembly-mode .leaderboard-item.gold   .rank { font-size: 52px; }
-.assembly-mode .leaderboard-item.silver .rank,
-.assembly-mode .leaderboard-item.bronze .rank { font-size: 44px; }
+.podium-block.pos-1 .podium-medal { font-size: 58px; }
+.podium-block.pos-2 .podium-medal { font-size: 46px; }
 
-/* Group name */
-
-.assembly-mode .group-name {
-    font-size: 24px;
-    font-weight: 700;
-}
-
-.assembly-mode .leaderboard-item.gold   .group-name { font-size: 32px; }
-.assembly-mode .leaderboard-item.silver .group-name,
-.assembly-mode .leaderboard-item.bronze .group-name { font-size: 28px; }
-
-/* Fire badge */
-
-.assembly-mode .fire-badge {
+.podium-name {
     font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.15;
+    word-break: break-word;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.podium-block.pos-1 .podium-name { font-size: 30px; }
+.podium-block.pos-2 .podium-name { font-size: 26px; }
+
+.podium-name .fire-badge {
+    font-size: 20px;
     animation: fire-bounce 1s ease-in-out infinite;
 }
 
-/* Year tag + rank change */
+.podium-block.pos-1 .podium-name .fire-badge { font-size: 26px; }
 
-.assembly-mode .year-tag {
-    font-size: 13px;
+.podium-year {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
 }
 
-.assembly-mode .rank-change {
-    font-size: 12px;
-    padding: 2px 6px;
+.podium-block.pos-1 .podium-year { font-size: 13px; }
+
+.podium-rank-change {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
 }
 
-/* Count */
+.podium-count {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
 
-.assembly-mode .box-count {
+.podium-block.pos-1 .podium-count {
+    font-size: 24px;
+    color: var(--gold-light);
+}
+
+.podium-block.pos-2 .podium-count {
     font-size: 20px;
+    color: var(--silver-light);
 }
 
-.assembly-mode .leaderboard-item.gold   .box-count { font-size: 26px; }
-.assembly-mode .leaderboard-item.silver .box-count,
-.assembly-mode .leaderboard-item.bronze .box-count { font-size: 23px; }
-
-.assembly-mode .gain-tag {
-    font-size: 13px;
-    padding: 2px 7px;
+.podium-block.pos-3 .podium-count {
+    color: var(--bronze-light);
 }
 
-/* Progress bar */
+/* ── Rest list (right column) ──────────────────────── */
 
-.assembly-mode .progress-track {
-    height: 8px;
-    margin-top: 12px;
+.assembly-mode .assembly-rest {
+    width: 215px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    overflow: hidden;
 }
 
-.assembly-mode .leaderboard-item.gold .progress-track {
-    height: 10px;
+.rest-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    border-left: 3px solid transparent;
+    flex-shrink: 0;
+}
+
+.rest-item.on-fire {
+    border-left-color: var(--fire);
+}
+
+.rest-rank {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-dim);
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.rest-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    overflow: hidden;
+}
+
+.rest-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+}
+
+.rest-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-variant-numeric: tabular-nums;
 }
 
 /* Footer */
 
 .assembly-mode .site-footer {
-    font-size: 13px;
-    padding: 14px 24px;
+    font-size: 12px;
+    padding: 8px 24px;
+    height: 40px;
 }
 
 /* ============================================================

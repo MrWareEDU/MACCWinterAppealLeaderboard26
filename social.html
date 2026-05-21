@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Graphics — Winter Appeal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #09182b;
+            color: #ddeaf5;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-size: 15px;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 32px 24px 64px;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #6a8faa;
+            margin-top: 4px;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 24px 0 16px;
+            padding: 16px 18px;
+            background: #0f2340;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px;
+        }
+
+        .format-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #6a8faa;
+            margin-right: 4px;
+        }
+
+        .fmt {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #6a8faa;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 6px 13px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+        }
+
+        .fmt:hover { background: #152d52; color: #ddeaf5; }
+
+        .fmt.active {
+            background: rgba(61,143,196,0.15);
+            border-color: rgba(61,143,196,0.4);
+            color: #7dc4ed;
+        }
+
+        .action-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: opacity 0.15s, background 0.15s;
+        }
+
+        #btnRefresh {
+            background: #152d52;
+            border-color: rgba(255,255,255,0.1);
+            color: #ddeaf5;
+        }
+
+        #btnRefresh:hover { background: #1e3d6e; }
+
+        #btnDownload {
+            background: #1565c0;
+            color: #fff;
+        }
+
+        #btnDownload:hover { background: #1976d2; }
+        #btnDownload:disabled { opacity: 0.4; cursor: default; }
+
+        .status {
+            font-size: 12px;
+            color: #6a8faa;
+            margin-bottom: 16px;
+            min-height: 18px;
+        }
+
+        .status.error { color: #cf7070; }
+
+        .canvas-outer {
+            background: #06101e;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow: auto;
+        }
+
+        #canvas {
+            display: block;
+            max-width: 100%;
+            max-height: 75vh;
+            width: auto;
+            height: auto;
+            border-radius: 4px;
+        }
+    </style>
+    <script src="js/config.js"></script>
+</head>
+<body>
+<div class="page">
+
+    <h1>Social Media Graphics</h1>
+    <p class="subtitle">Download a shareable image generated from live leaderboard data.</p>
+
+    <div class="toolbar">
+        <div class="format-group">
+            <span class="label">Format</span>
+            <button class="fmt active" data-w="1080" data-h="1080">Instagram Post</button>
+            <button class="fmt" data-w="1200" data-h="630">Facebook / X</button>
+            <button class="fmt" data-w="1080" data-h="1920">Instagram Story</button>
+        </div>
+        <div class="action-group">
+            <button class="btn" id="btnRefresh">↻ Refresh</button>
+            <button class="btn" id="btnDownload" disabled>↓ Download PNG</button>
+        </div>
+    </div>
+
+    <p class="status" id="status">Loading data…</p>
+
+    <div class="canvas-outer">
+        <canvas id="canvas"></canvas>
+    </div>
+
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    const canvas  = document.getElementById('canvas');
+    const ctx     = canvas.getContext('2d');
+    const dlBtn   = document.getElementById('btnDownload');
+    const status  = document.getElementById('status');
+
+    let currentRows = [];
+    let currentW    = 1080;
+    let currentH    = 1080;
+
+    // ── Format buttons ───────────────────────────────────
+
+    document.querySelectorAll('.fmt').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.fmt').forEach(function (b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            currentW = parseInt(btn.dataset.w, 10);
+            currentH = parseInt(btn.dataset.h, 10);
+            if (currentRows.length) drawGraphic(currentRows);
+        });
+    });
+
+    // ── Refresh ──────────────────────────────────────────
+
+    document.getElementById('btnRefresh').addEventListener('click', loadData);
+
+    // ── Download ─────────────────────────────────────────
+
+    dlBtn.addEventListener('click', function () {
+        const a = document.createElement('a');
+        a.download = 'winter-appeal-' + CONFIG.APPEAL_YEAR + '-' + currentW + 'x' + currentH + '.png';
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+    });
+
+    // ── Data fetching ────────────────────────────────────
+
+    function sheetURL() {
+        return (
+            'https://docs.google.com/spreadsheets/d/' +
+            CONFIG.SHEET_ID +
+            '/pub?gid=' +
+            CONFIG.SHEET_GID +
+            '&single=true&output=csv'
+        );
+    }
+
+    function parseCSVLine(line) {
+        const fields = [];
+        let current  = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (ch === '"') {
+                inQuotes = !inQuotes;
+            } else if (ch === ',' && !inQuotes) {
+                fields.push(current.trim());
+                current = '';
+            } else {
+                current += ch;
+            }
+        }
+        fields.push(current.trim());
+        return fields;
+    }
+
+    function parseCSV(text) {
+        const lines = text.trim().split('\n');
+        if (lines.length < 2) return [];
+        const rows = [];
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            const f = parseCSVLine(line);
+            const careGroup = f[0] || '';
+            const yearGroup = f[1] || '';
+            const boxes     = parseInt(f[2], 10);
+            if (careGroup) rows.push({ careGroup, yearGroup, boxes: isNaN(boxes) ? 0 : boxes });
+        }
+        return rows.sort(function (a, b) { return b.boxes - a.boxes; });
+    }
+
+    async function loadData() {
+        setStatus('Fetching data…', false);
+        dlBtn.disabled = true;
+        try {
+            const res  = await fetch(sheetURL(), { cache: 'no-store' });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const text = await res.text();
+            currentRows = parseCSV(text);
+            if (!currentRows.length) throw new Error('No data in sheet');
+            await drawGraphic(currentRows);
+            const now = new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
+            setStatus('Data loaded at ' + now + ' · ' + currentRows.length + ' groups', false);
+            dlBtn.disabled = false;
+        } catch (err) {
+            setStatus('Error: ' + err.message, true);
+        }
+    }
+
+    function setStatus(msg, isError) {
+        status.textContent = msg;
+        status.className   = 'status' + (isError ? ' error' : '');
+    }
+
+    // ── Canvas drawing ───────────────────────────────────
+
+    async function drawGraphic(rows) {
+        const W = currentW;
+        const H = currentH;
+
+        canvas.width  = W;
+        canvas.height = H;
+
+        // Wait for Inter to load
+        try { await document.fonts.load('700 60px Inter'); } catch (e) {}
+
+        const isStory  = H > W * 1.2;
+        const maxRows  = isStory ? 10 : H < 700 ? 5 : 6;
+        const display  = rows.slice(0, maxRows);
+        const total    = rows.reduce(function (s, r) { return s + r.boxes; }, 0);
+        const maxBoxes = display[0] ? display[0].boxes || 1 : 1;
+
+        const PAD = Math.round(W * 0.055);
+
+        // ── Background ──────────────────────────────────
+
+        const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+        bgGrad.addColorStop(0, '#071524');
+        bgGrad.addColorStop(1, '#0d1f38');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, W, H);
+
+        // ── Top accent bar ───────────────────────────────
+
+        const accentGrad = ctx.createLinearGradient(0, 0, W, 0);
+        accentGrad.addColorStop(0,   '#1565c0');
+        accentGrad.addColorStop(0.5, '#c9981a');
+        accentGrad.addColorStop(1,   '#e8740a');
+        ctx.fillStyle = accentGrad;
+        ctx.fillRect(0, 0, W, 7);
+
+        // ── Header ───────────────────────────────────────
+
+        const HEADER_H  = Math.round(H * (isStory ? 0.12 : 0.165));
+        const titleSize = Math.round(W * (isStory ? 0.05 : 0.046));
+        const subSize   = Math.round(W * 0.017);
+        const badgeSize = Math.round(W * 0.013);
+
+        // School badge
+        const BADGE_Y = 7 + Math.round(HEADER_H * 0.22);
+        ctx.font = '700 ' + badgeSize + 'px Inter, system-ui';
+        const badgeText  = CONFIG.SCHOOL_NAME;
+        const badgeTW    = ctx.measureText(badgeText).width;
+        const BADGE_PX   = 12;
+        const BADGE_W    = badgeTW + BADGE_PX * 2;
+        const BADGE_H    = Math.round(badgeSize * 1.85);
+
+        ctx.fillStyle = 'rgba(61,143,196,0.15)';
+        rrect(ctx, PAD, BADGE_Y, BADGE_W, BADGE_H, 4);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(61,143,196,0.45)';
+        ctx.lineWidth = 1.5;
+        rrect(ctx, PAD, BADGE_Y, BADGE_W, BADGE_H, 4);
+        ctx.stroke();
+        ctx.fillStyle = '#7dc4ed';
+        ctx.font = '700 ' + badgeSize + 'px Inter, system-ui';
+        ctx.textAlign    = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(badgeText, PAD + BADGE_PX, BADGE_Y + BADGE_H / 2);
+
+        // Title
+        const TITLE_Y = BADGE_Y + BADGE_H + Math.round(titleSize * 1.1);
+        ctx.font = '800 ' + titleSize + 'px Inter, system-ui';
+        ctx.fillStyle    = '#ffffff';
+        ctx.textAlign    = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText('Winter Appeal ' + CONFIG.APPEAL_YEAR, PAD, TITLE_Y);
+
+        // Subtitle
+        ctx.font = '500 ' + subSize + 'px Inter, system-ui';
+        ctx.fillStyle = '#6a8faa';
+        ctx.fillText('Care Group Leaderboard', PAD, TITLE_Y + Math.round(subSize * 1.7));
+
+        // Date (right-aligned, vertically centred on title)
+        const today = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+        const dateSize = Math.round(W * 0.014);
+        ctx.font = '500 ' + dateSize + 'px Inter, system-ui';
+        ctx.fillStyle    = '#405b72';
+        ctx.textAlign    = 'right';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText(today, W - PAD, TITLE_Y);
+
+        // Separator
+        const SEP_Y = 7 + HEADER_H;
+        ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(PAD, SEP_Y);
+        ctx.lineTo(W - PAD, SEP_Y);
+        ctx.stroke();
+
+        // ── Groups ───────────────────────────────────────
+
+        const FOOTER_H  = Math.round(H * (isStory ? 0.1 : 0.135));
+        const GROUPS_H  = H - SEP_Y - FOOTER_H - 12;
+        const ROW_H     = Math.floor(GROUPS_H / maxRows);
+        const ROW_PAD_V = Math.round(ROW_H * 0.14);
+
+        const RANK_W  = Math.round(W * 0.082);
+        const NAME_X  = PAD + RANK_W + Math.round(W * 0.015);
+        const COUNT_X = W - PAD - Math.round(W * 0.02);
+
+        const GOLD_COLOR   = '#f0c94a';
+        const SILVER_COLOR = '#b8cdd8';
+        const BRONZE_COLOR = '#d8925a';
+        const DIM_COLOR    = '#405b72';
+
+        function rankColor(r) {
+            return r === 1 ? GOLD_COLOR : r === 2 ? SILVER_COLOR : r === 3 ? BRONZE_COLOR : DIM_COLOR;
+        }
+
+        function barColors(r) {
+            if (r === 1) return ['#c9981a', '#f0c94a'];
+            if (r === 2) return ['#6a8faa', '#b8cdd8'];
+            if (r === 3) return ['#b06b2a', '#d8925a'];
+            return ['#1e4070', '#3d8fc4'];
+        }
+
+        function rowBg(r) {
+            if (r === 1) return 'rgba(201,152,26,0.10)';
+            if (r === 2) return 'rgba(128,153,172,0.08)';
+            if (r === 3) return 'rgba(176,107,42,0.08)';
+            return 'rgba(15,35,64,0.55)';
+        }
+
+        display.forEach(function (row, idx) {
+            const rank  = idx + 1;
+            const rowY  = SEP_Y + 10 + idx * ROW_H;
+            const inner = rowY + ROW_PAD_V;
+            const innerH = ROW_H - ROW_PAD_V * 2;
+
+            // Row background
+            ctx.fillStyle = rowBg(rank);
+            rrect(ctx, PAD, inner, W - PAD * 2, innerH, 8);
+            ctx.fill();
+
+            // Left accent strip
+            ctx.fillStyle = rankColor(rank);
+            rrect(ctx, PAD, inner, 4, innerH, [2, 0, 0, 2]);
+            ctx.fill();
+
+            // Rank number
+            const rankSize = Math.round(innerH * 0.55);
+            ctx.font = '700 ' + rankSize + 'px Inter, system-ui';
+            ctx.fillStyle    = rankColor(rank);
+            ctx.textAlign    = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(rank, PAD + RANK_W / 2, rowY + ROW_H / 2);
+
+            // Care group name
+            const nameSize = Math.round(innerH * 0.37);
+            ctx.font = '700 ' + nameSize + 'px Inter, system-ui';
+            ctx.fillStyle    = '#ffffff';
+            ctx.textAlign    = 'left';
+            ctx.textBaseline = 'top';
+            ctx.fillText(row.careGroup, NAME_X, inner + Math.round(innerH * 0.08));
+
+            // Year group tag
+            if (row.yearGroup) {
+                const yrSize = Math.round(nameSize * 0.55);
+                ctx.font = '500 ' + yrSize + 'px Inter, system-ui';
+                ctx.fillStyle = '#6a8faa';
+                ctx.fillText(row.yearGroup, NAME_X, inner + Math.round(innerH * 0.08) + Math.round(nameSize * 1.25));
+            }
+
+            // Donation count
+            const countSize = Math.round(innerH * 0.33);
+            ctx.font = '700 ' + countSize + 'px Inter, system-ui';
+            ctx.fillStyle    = rankColor(rank);
+            ctx.textAlign    = 'right';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(
+                row.boxes + (row.boxes === 1 ? ' donation' : ' donations'),
+                COUNT_X,
+                rowY + ROW_H / 2 - countSize * 0.15
+            );
+
+            // Progress bar
+            const pct   = Math.max(0.03, row.boxes / maxBoxes);
+            const BAR_X = NAME_X;
+            const BAR_W = COUNT_X - NAME_X - Math.round(W * 0.015);
+            const BAR_Y = inner + innerH - 6;
+            const BAR_H = Math.max(4, Math.round(innerH * 0.07));
+
+            ctx.fillStyle = 'rgba(255,255,255,0.07)';
+            rrect(ctx, BAR_X, BAR_Y - BAR_H, BAR_W, BAR_H, 99);
+            ctx.fill();
+
+            const bc  = barColors(rank);
+            const bGr = ctx.createLinearGradient(BAR_X, 0, BAR_X + BAR_W * pct, 0);
+            bGr.addColorStop(0, bc[0]);
+            bGr.addColorStop(1, bc[1]);
+            ctx.fillStyle = bGr;
+            rrect(ctx, BAR_X, BAR_Y - BAR_H, Math.max(8, BAR_W * pct), BAR_H, 99);
+            ctx.fill();
+        });
+
+        // ── Footer ───────────────────────────────────────
+
+        const FY = H - FOOTER_H + 8;
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(PAD, FY);
+        ctx.lineTo(W - PAD, FY);
+        ctx.stroke();
+
+        const totalNumSize = Math.round(W * 0.055);
+        ctx.font = '800 ' + totalNumSize + 'px Inter, system-ui';
+        ctx.fillStyle    = '#f0c94a';
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(total, W / 2, FY + FOOTER_H * 0.38);
+
+        const totalLblSize = Math.round(W * 0.018);
+        ctx.font = '500 ' + totalLblSize + 'px Inter, system-ui';
+        ctx.fillStyle = '#6a8faa';
+        ctx.fillText('total donations raised school-wide', W / 2, FY + FOOTER_H * 0.38 + totalNumSize * 0.88);
+
+        const brandSize = Math.round(W * 0.013);
+        ctx.font = '500 ' + brandSize + 'px Inter, system-ui';
+        ctx.fillStyle = '#253d55';
+        ctx.fillText(CONFIG.SCHOOL_NAME + ' · Winter Appeal ' + CONFIG.APPEAL_YEAR, W / 2, FY + FOOTER_H * 0.86);
+    }
+
+    // ── Rounded rect helper ────────────────────────────
+
+    function rrect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        if (ctx.roundRect) {
+            ctx.roundRect(x, y, w, h, r);
+        } else {
+            const tl = typeof r === 'number' ? r : (r[0] || 0);
+            const tr = typeof r === 'number' ? r : (r[1] || 0);
+            const br = typeof r === 'number' ? r : (r[2] || 0);
+            const bl = typeof r === 'number' ? r : (r[3] || 0);
+            ctx.moveTo(x + tl, y);
+            ctx.lineTo(x + w - tr, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + tr);
+            ctx.lineTo(x + w, y + h - br);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - br, y + h);
+            ctx.lineTo(x + bl, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - bl);
+            ctx.lineTo(x, y + tl);
+            ctx.quadraticCurveTo(x, y, x + tl, y);
+            ctx.closePath();
+        }
+    }
+
+    // ── Boot ──────────────────────────────────────────
+
+    loadData();
+
+}());
+</script>
+</body>
+</html>

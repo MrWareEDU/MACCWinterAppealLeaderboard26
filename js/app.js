@@ -314,6 +314,8 @@
             renderList();
             renderLastUpdated();
             renderAssemblyPanel();
+            renderPodium();
+            renderAssemblyRest();
 
         } catch (err) {
             if (state.firstLoad) {
@@ -323,6 +325,92 @@
                 listEl.classList.add('hidden');
             }
         }
+    }
+
+    // ── Podium (assembly center) ────────────────────────────
+
+    function renderPodium() {
+        const el = document.getElementById('assemblyPodium');
+        if (!el) return;
+        const ranked = rankRows(state.rows);
+        const top3   = ranked.slice(0, 3);
+
+        // Classic podium order: 2nd | 1st | 3rd
+        const order    = [top3[1], top3[0], top3[2]];
+        const posClass = ['pos-2', 'pos-1', 'pos-3'];
+        const medals   = ['🥈', '🥇', '🥉'];
+
+        el.innerHTML = order.map(function (row, i) {
+            if (!row) return '';
+            const isOnFire  = state.onFire.has(row.careGroup);
+            const fireClass = isOnFire ? ' on-fire' : '';
+            const prevRow   = state.prevRows.find(function (r) { return r.careGroup === row.careGroup; });
+            const gain      = (prevRow && row.boxes > prevRow.boxes) ? row.boxes - prevRow.boxes : 0;
+            const prevRank  = state.prevRanks[row.careGroup];
+            const rankDelta = prevRank ? prevRank - row.rank : 0;
+
+            return (
+                '<div class="podium-block ' + posClass[i] + fireClass + '">' +
+                    '<div class="podium-medal">' + medals[i] + '</div>' +
+                    '<div class="podium-name">' +
+                        escapeHTML(row.careGroup) +
+                        (isOnFire ? '<span class="fire-badge">🔥</span>' : '') +
+                    '</div>' +
+                    (row.yearGroup
+                        ? '<div class="podium-year">' + escapeHTML(row.yearGroup) + '</div>'
+                        : '') +
+                    (rankDelta > 0
+                        ? '<div class="podium-rank-change rank-up-ind">↑' + rankDelta + ' place' + (rankDelta > 1 ? 's' : '') + '</div>'
+                        : '') +
+                    (rankDelta < 0
+                        ? '<div class="podium-rank-change rank-dn-ind">↓' + Math.abs(rankDelta) + ' place' + (Math.abs(rankDelta) > 1 ? 's' : '') + '</div>'
+                        : '') +
+                    '<div class="podium-count">' +
+                        row.boxes + ' donation' + (row.boxes === 1 ? '' : 's') +
+                        (gain > 0 ? '<span class="gain-tag">+' + gain + '</span>' : '') +
+                    '</div>' +
+                '</div>'
+            );
+        }).join('');
+    }
+
+    // ── Rest list (assembly right) ──────────────────────────
+
+    function renderAssemblyRest() {
+        const el = document.getElementById('assemblyRest');
+        if (!el) return;
+        const ranked = rankRows(state.rows);
+        const rest   = ranked.slice(3, 11);
+
+        el.innerHTML = rest.map(function (row) {
+            const isOnFire  = state.onFire.has(row.careGroup);
+            const prevRow   = state.prevRows.find(function (r) { return r.careGroup === row.careGroup; });
+            const gain      = (prevRow && row.boxes > prevRow.boxes) ? row.boxes - prevRow.boxes : 0;
+            const prevRank  = state.prevRanks[row.careGroup];
+            const rankDelta = prevRank ? prevRank - row.rank : 0;
+
+            return (
+                '<div class="rest-item' + (isOnFire ? ' on-fire' : '') + '">' +
+                    '<span class="rest-rank">' + row.rank + '</span>' +
+                    '<div class="rest-info">' +
+                        '<span class="rest-name">' +
+                            escapeHTML(row.careGroup) +
+                            (isOnFire ? ' 🔥' : '') +
+                        '</span>' +
+                        (rankDelta > 0
+                            ? '<span class="rank-change rank-up-ind">↑' + rankDelta + '</span>'
+                            : '') +
+                        (rankDelta < 0
+                            ? '<span class="rank-change rank-dn-ind">↓' + Math.abs(rankDelta) + '</span>'
+                            : '') +
+                    '</div>' +
+                    '<span class="rest-count">' +
+                        row.boxes +
+                        (gain > 0 ? ' <span class="gain-tag">+' + gain + '</span>' : '') +
+                    '</span>' +
+                '</div>'
+            );
+        }).join('');
     }
 
     // ── Assembly view ──────────────────────────────────────
@@ -366,7 +454,7 @@
             .replace(/"/g, '&quot;');
     }
 
-    // ── Init ─────────────────────────────────────────────────
+    // ── Init ─────────────────────────────────────────────
 
     document.addEventListener('DOMContentLoaded', function () {
         renderHeader();
