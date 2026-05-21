@@ -372,11 +372,11 @@
                         Type: <strong>Dropdown</strong>. Add one option per care group (e.g. 9A, 9B, 10A, 10B, 11A…). Mark as required.
                     </li>
                     <li>
-                        <strong>Question 2 — Total boxes collected so far</strong><br>
+                        <strong>Question 2 — Total donations collected so far</strong><br>
                         Type: <strong>Short answer</strong>. Click the three-dot menu on the question and choose <strong>Response validation</strong> → Number → Greater than or equal to → 0. Mark as required.
                     </li>
                 </ol>
-                <div class="note">Teachers submit the <strong>running total</strong>, not just boxes added since last time. The leaderboard always shows the most recent submission per care group, so totals are always accurate.</div>
+                <div class="note">Teachers submit the <strong>running total</strong>, not just new donations since last time. The leaderboard always shows the most recent submission per care group, so totals are always accurate.</div>
             </div>
         </div>
 
@@ -394,8 +394,8 @@
                     <li>Choose <strong>Create a new spreadsheet</strong> and name it <strong>Winter Appeal 2026 — Data</strong></li>
                     <li>Click <strong>Create</strong></li>
                 </ol>
-                <p>Google will open the Sheet. It will have one tab called <strong>Form Responses 1</strong> with three columns: Timestamp, Care Group, and Total boxes collected so far.</p>
-                <div class="note">Do not rename or move this tab — the formula in the next step depends on it.</div>
+                <p>Google will open the Sheet. It will have one tab called <strong>Form responses</strong> (lowercase r) with four columns: Timestamp, Email address, Care Group, and your donations question.</p>
+                <div class="note">Do not rename or move this tab — the formula in the next step depends on it being named exactly <strong>Form responses</strong>.</div>
             </div>
         </div>
 
@@ -406,31 +406,31 @@
                 <div class="step-title">Create the Leaderboard tab</div>
             </div>
             <div class="step-body">
-                <p>The leaderboard needs a clean tab showing one row per care group with the most recent box count. Add a new tab to the Sheet:</p>
+                <p>The leaderboard needs a clean tab showing one row per care group with the most recent donation count. Add a new tab to the Sheet:</p>
                 <ol>
                     <li>Click the <strong>+</strong> button at the bottom left of the Sheet to add a new tab</li>
                     <li>Double-click the new tab and rename it <strong>Leaderboard</strong></li>
-                    <li>In row 1, type these three headings exactly: <strong>Care Group</strong> (A1), <strong>Year Group</strong> (B1), <strong>Boxes</strong> (C1)</li>
-                    <li>From row 2 down, fill in column A and B with your care groups and year groups — one row per group</li>
+                    <li>In row 1, type these three headings exactly: <strong>Care Group</strong> (A1), <strong>Year Group</strong> (B1), <strong>Donations</strong> (C1)</li>
+                    <li>From row 2 down, fill in column A with each care group name and column B with its year group — one row per group</li>
                 </ol>
 
                 <table class="table-example">
                     <thead>
-                        <tr><th>Care Group</th><th>Year Group</th><th>Boxes</th></tr>
+                        <tr><th>Care Group</th><th>Year Group</th><th>Donations</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>9A</td><td>Year 9</td><td><em>(formula)</em></td></tr>
-                        <tr><td>9B</td><td>Year 9</td><td><em>(formula)</em></td></tr>
-                        <tr><td>10A</td><td>Year 10</td><td><em>(formula)</em></td></tr>
-                        <tr><td>10B</td><td>Year 10</td><td><em>(formula)</em></td></tr>
-                        <tr><td>11A</td><td>Year 11</td><td><em>(formula)</em></td></tr>
+                        <tr><td>07HRM1</td><td>Year 7</td><td><em>(formula)</em></td></tr>
+                        <tr><td>07HRM2</td><td>Year 7</td><td><em>(formula)</em></td></tr>
+                        <tr><td>08HRM1</td><td>Year 8</td><td><em>(formula)</em></td></tr>
+                        <tr><td>08HRM2</td><td>Year 8</td><td><em>(formula)</em></td></tr>
+                        <tr><td>09HRM1</td><td>Year 9</td><td><em>(formula)</em></td></tr>
                     </tbody>
                 </table>
 
                 <p>In cell <strong>C2</strong>, paste this formula exactly:</p>
-                <div class="code-block">=IFERROR(INDEX('Form Responses 1'!C:C,MATCH(MAXIFS('Form Responses 1'!A:A,'Form Responses 1'!B:B,A2),'Form Responses 1'!A:A,0)),0)</div>
+                <div class="code-block">=IFERROR(INDEX('Form responses'!D:D,MATCH(MAXIFS('Form responses'!A:A,'Form responses'!C:C,A2),'Form responses'!A:A,0)),0)</div>
                 <p>Then drag the formula down to fill C3, C4, and so on — one cell per care group row.</p>
-                <div class="note">This formula finds the most recent form submission for each care group and shows that number. If no submission has been made yet, it shows 0. Make sure the tab is named exactly <strong>Form Responses 1</strong> (capital R) — Google Forms creates it this way automatically.</div>
+                <div class="note">Column B in <strong>Form responses</strong> is Email address, so Care Group is column C and the donation count is column D. The single quotes around the tab name are required because it contains a space. If no submission has been made yet for a care group, the formula shows 0.</div>
             </div>
         </div>
 
@@ -487,7 +487,7 @@
     SHEET_GID: '839652104',</div>
 
                 <p>Replace both values with your own Sheet ID and Leaderboard tab GID from the previous step. Save the file and commit the change to the repository.</p>
-                <div class="note">The GID must point to the <strong>Leaderboard</strong> tab — not the Form Responses tab. If the leaderboard page shows no data, this is the most likely cause.</div>
+                <div class="note">The GID must point to the <strong>Leaderboard</strong> tab — not the Form responses tab. If the leaderboard page shows no data, this is the most likely cause.</div>
             </div>
         </div>
 
@@ -519,7 +519,7 @@
                 <div class="step-title">Share the form with care teachers</div>
             </div>
             <div class="step-body">
-                <p>Care teachers submit box counts through the Google Form — no Sheet access needed.</p>
+                <p>Care teachers submit donation counts through the Google Form — no Sheet access needed.</p>
                 <ol>
                     <li>Open the Google Form</li>
                     <li>Click the <strong>Send</strong> button (top right)</li>
