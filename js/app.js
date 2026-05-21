@@ -4,10 +4,13 @@
     // ── State ────────────────────────────────────────────
 
     const state = {
-        rows: [],
+        rows:       [],
+        prevRows:   [],
+        prevRanks:  {},
+        onFire:     new Set(),
         activeFilter: 'all',
-        lastUpdated: null,
-        firstLoad: true,
+        lastUpdated:  null,
+        firstLoad:    true,
     };
 
     // ── Data fetching ──────────────────────────────────────
@@ -33,7 +36,7 @@
 
     function parseCSVLine(line) {
         const fields = [];
-        let current = '';
+        let current  = '';
         let inQuotes = false;
         for (let i = 0; i < line.length; i++) {
             const ch = line[i];
@@ -58,10 +61,10 @@
         for (let i = 1; i < lines.length; i++) {
             const line = lines[i].trim();
             if (!line) continue;
-            const fields = parseCSVLine(line);
+            const fields    = parseCSVLine(line);
             const careGroup = fields[0] || '';
             const yearGroup = fields[1] || '';
-            const boxes = parseInt(fields[2], 10);
+            const boxes     = parseInt(fields[2], 10);
             if (careGroup) {
                 rows.push({
                     careGroup,
@@ -99,7 +102,7 @@
     }
 
     function yearGroups() {
-        const seen = {};
+        const seen   = {};
         const groups = [];
         state.rows.forEach(function (r) {
             if (r.yearGroup && !seen[r.yearGroup]) {
@@ -108,6 +111,60 @@
             }
         });
         return groups.sort();
+    }
+
+    // ── Assembly stats panel ───────────────────────────────
+
+    function renderAssemblyPanel() {
+        const rows = state.rows;
+
+        // Total donations
+        const total = rows.reduce(function (s, r) { return s + r.boxes; }, 0);
+
+        // Leading year group by total donations
+        const yearTotals = {};
+        rows.forEach(function (r) {
+            if (r.yearGroup) {
+                yearTotals[r.yearGroup] = (yearTotals[r.yearGroup] || 0) + r.boxes;
+            }
+        });
+        const yearEntries  = Object.entries(yearTotals).sort(function (a, b) { return b[1] - a[1]; });
+        const leadingYear  = yearEntries.length ? yearEntries[0][0] : '—';
+        const leadingTotal = yearEntries.length ? yearEntries[0][1] + ' donations' : '';
+
+        // On fire groups
+        const fireGroups = Array.from(state.onFire);
+        const fireCount  = fireGroups.length;
+        const fireDetail = fireGroups.length
+            ? fireGroups.slice(0, 3).join(', ') + (fireGroups.length > 3 ? ' +' + (fireGroups.length - 3) + ' more' : '')
+            : 'none this refresh';
+
+        // Biggest jump since last fetch
+        let biggestGroup = '—', biggestGain = 0, biggestDetail = '';
+        rows.forEach(function (row) {
+            const prev = state.prevRows.find(function (r) { return r.careGroup === row.careGroup; });
+            if (prev) {
+                const gain = row.boxes - prev.boxes;
+                if (gain > biggestGain) {
+                    biggestGain   = gain;
+                    biggestGroup  = row.careGroup;
+                    biggestDetail = '+' + gain + ' this refresh';
+                }
+            }
+        });
+
+        function set(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = val;
+        }
+
+        set('statTotalVal',    total);
+        set('statYearVal',     leadingYear);
+        set('statYearDetail',  leadingTotal);
+        set('statFireVal',     fireCount || '—');
+        set('statFireDetail',  fireDetail);
+        set('statJumpVal',     biggestGroup);
+        set('statJumpDetail',  biggestDetail);
     }
 
     // ── Rendering ──────────────────────────────────────────
@@ -162,22 +219,42 @@
         const maxBoxes = rows[0].boxes || 1;
 
         list.innerHTML = rows.map(function (row) {
-            const pct       = Math.max(2, Math.round((row.boxes / maxBoxes) * 100));
+            const pct        = Math.max(2, Math.round((row.boxes / maxBoxes) * 100));
             const medalClass = row.rank === 1 ? ' gold'
                              : row.rank === 2 ? ' silver'
                              : row.rank === 3 ? ' bronze'
                              : '';
+            const isOnFire  = state.onFire.has(row.careGroup);
+            const fireClass = isOnFire ? ' on-fire' : '';
+            const prevRow   = state.prevRows.find(function (r) { return r.careGroup === row.careGroup; });
+            const gain      = (prevRow && row.boxes > prevRow.boxes) ? row.boxes - prevRow.boxes : 0;
+            const prevRank  = state.prevRanks[row.careGroup];
+            const rankDelta = prevRank ? prevRank - row.rank : 0;
 
             return (
-                '<li class="leaderboard-item' + medalClass + '">' +
+                '<li class="leaderboard-item' + medalClass + fireClass + '">' +
                     '<span class="rank">' + row.rank + '</span>' +
                     '<div class="group-info">' +
-                        '<span class="group-name">' + escapeHTML(row.careGroup) + '</span>' +
-                        (row.yearGroup
-                            ? '<span class="year-tag">' + escapeHTML(row.yearGroup) + '</span>'
-                            : '') +
+                        '<div class="group-name-row">' +
+                            '<span class="group-name">' + escapeHTML(row.careGroup) + '</span>' +
+                            (isOnFire ? '<span class="fire-badge">🔥</span>' : '') +
+                        '</div>' +
+                        '<div class="group-meta">' +
+                            (row.yearGroup
+                                ? '<span class="year-tag">' + escapeHTML(row.yearGroup) + '</span>'
+                                : '') +
+                            (rankDelta > 0
+                                ? '<span class="rank-change rank-up-ind">↑' + rankDelta + '</span>'
+                                : '') +
+                            (rankDelta < 0
+                                ? '<span class="rank-change rank-dn-ind">↓' + Math.abs(rankDelta) + '</span>'
+                                : '') +
+                        '</div>' +
                     '</div>' +
-                    '<span class="box-count">' + row.boxes + ' donation' + (row.boxes === 1 ? '' : 's') + '</span>' +
+                    '<span class="box-count">' +
+                        row.boxes + ' donation' + (row.boxes === 1 ? '' : 's') +
+                        (gain > 0 ? '<span class="gain-tag">+' + gain + '</span>' : '') +
+                    '</span>' +
                     '<div class="progress-track">' +
                         '<div class="progress-fill" style="width:' + pct + '%"></div>' +
                     '</div>' +
@@ -209,7 +286,22 @@
         try {
             const rows = await fetchData();
 
-            state.rows       = rows;
+            // Snapshot previous state before overwriting
+            const prevRanked = rankRows(state.rows);
+            state.prevRanks  = {};
+            prevRanked.forEach(function (r) { state.prevRanks[r.careGroup] = r.rank; });
+            state.prevRows   = state.rows.slice();
+
+            // Detect on-fire groups (increased since last fetch)
+            state.onFire = new Set();
+            rows.forEach(function (row) {
+                const prev = state.prevRows.find(function (r) { return r.careGroup === row.careGroup; });
+                if (prev && row.boxes > prev.boxes) {
+                    state.onFire.add(row.careGroup);
+                }
+            });
+
+            state.rows        = rows;
             state.lastUpdated = new Date();
 
             if (state.firstLoad) {
@@ -221,6 +313,7 @@
             renderFilters();
             renderList();
             renderLastUpdated();
+            renderAssemblyPanel();
 
         } catch (err) {
             if (state.firstLoad) {

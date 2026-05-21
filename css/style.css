@@ -26,6 +26,10 @@
     --bronze:       #b06b2a;
     --bronze-light: #d8925a;
     --bronze-bg:    rgba(176, 107, 42, 0.07);
+    --fire:         #e8740a;
+    --fire-light:   #ff9b50;
+    --green:        #4caf82;
+    --green-light:  #6dd4a8;
     --radius:       6px;
     --header-h:     72px;
     --footer-h:     44px;
@@ -213,6 +217,59 @@ body {
 }
 
 /* ============================================================
+   Assembly stats panel (hidden by default, shown in assembly mode)
+============================================================ */
+
+.assembly-panel {
+    display: none;
+}
+
+.stat-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 16px;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 44px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: white;
+}
+
+.stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-top: 8px;
+}
+
+.stat-detail {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 5px;
+    min-height: 16px;
+    line-height: 1.3;
+}
+
+.stat-card.stat-total { border-color: rgba(201, 152, 26, 0.3); }
+.stat-card.stat-total .stat-value { color: var(--gold-light); }
+
+.stat-card.stat-year { border-color: rgba(61, 143, 196, 0.3); }
+.stat-card.stat-year .stat-value { color: #7dc4ed; }
+
+.stat-card.stat-fire { border-color: rgba(232, 116, 10, 0.3); }
+.stat-card.stat-fire .stat-value { color: var(--fire-light); }
+
+.stat-card.stat-jump { border-color: rgba(76, 175, 130, 0.3); }
+.stat-card.stat-jump .stat-value { color: var(--green-light); }
+
+/* ============================================================
    Leaderboard
 ============================================================ */
 
@@ -226,6 +283,7 @@ body {
 .leaderboard-item {
     display: grid;
     grid-template-columns: 48px 1fr auto;
+    grid-template-rows: auto auto;
     align-items: center;
     gap: 0 16px;
     padding: 14px 18px 14px 16px;
@@ -259,9 +317,16 @@ body {
     border-left-color: var(--bronze);
 }
 
+.leaderboard-item.on-fire {
+    border-left-color: var(--fire);
+}
+
 /* Rank number */
 
 .rank {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    align-self: center;
     font-size: 22px;
     font-weight: 700;
     color: var(--text-dim);
@@ -277,9 +342,18 @@ body {
 /* Group info */
 
 .group-info {
+    grid-column: 2;
+    grid-row: 1;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
+    min-width: 0;
+}
+
+.group-name-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
     min-width: 0;
 }
 
@@ -292,6 +366,18 @@ body {
     text-overflow: ellipsis;
 }
 
+.fire-badge {
+    font-size: 15px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.group-meta {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
 .year-tag {
     font-size: 11px;
     font-weight: 500;
@@ -299,35 +385,53 @@ body {
     letter-spacing: 0.03em;
 }
 
-/* Progress area — spans full width below name and count */
+/* Rank change indicators */
 
-.leaderboard-item {
-    grid-template-columns: 48px 1fr auto;
-    grid-template-rows: auto auto;
+.rank-change {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 4px;
+    border-radius: 3px;
+    letter-spacing: 0.02em;
 }
 
-.group-info {
-    grid-column: 2;
-    grid-row: 1;
+.rank-up-ind {
+    color: var(--green);
+    background: rgba(76, 175, 130, 0.12);
 }
+
+.rank-dn-ind {
+    color: #cf7070;
+    background: rgba(207, 112, 112, 0.1);
+}
+
+/* Count + gain tag */
 
 .box-count {
     grid-column: 3;
     grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
     font-size: 15px;
     font-weight: 600;
     color: var(--text);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
-    text-align: right;
     align-self: center;
 }
 
-.rank {
-    grid-column: 1;
-    grid-row: 1 / 3;
-    align-self: center;
+.gain-tag {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--green);
+    background: rgba(76, 175, 130, 0.12);
+    border-radius: 3px;
+    padding: 1px 5px;
 }
+
+/* Progress area */
 
 .progress-track {
     grid-column: 2 / 4;
@@ -350,16 +454,6 @@ body {
 .leaderboard-item.gold   .progress-fill { background: var(--gold); }
 .leaderboard-item.silver .progress-fill { background: var(--silver); }
 .leaderboard-item.bronze .progress-fill { background: var(--bronze-light); }
-
-/* Tied rank indicator */
-
-.tied-label {
-    font-size: 10px;
-    font-weight: 500;
-    color: var(--text-dim);
-    letter-spacing: 0.04em;
-    margin-top: 1px;
-}
 
 /* Empty / no data */
 
@@ -393,15 +487,44 @@ body {
 }
 
 /* ============================================================
+   Animations
+============================================================ */
+
+@keyframes fire-glow {
+    0%, 100% { box-shadow: none; }
+    50%       { box-shadow: 0 0 28px rgba(232, 116, 10, 0.45), 0 0 56px rgba(232, 116, 10, 0.2); }
+}
+
+@keyframes fire-bounce {
+    0%, 100% { transform: translateY(0) rotate(-8deg); }
+    50%       { transform: translateY(-5px) rotate(8deg); }
+}
+
+@keyframes gold-pulse {
+    0%, 100% { box-shadow: none; }
+    50%       { box-shadow: 0 0 32px rgba(201, 152, 26, 0.35), 0 0 64px rgba(201, 152, 26, 0.15); }
+}
+
+/* ============================================================
    Assembly (fullscreen) mode
 ============================================================ */
 
+.assembly-mode {
+    background-color: #06101e;
+}
+
 .assembly-mode .site-header {
-    height: 88px;
+    height: 96px;
+    background: linear-gradient(180deg, #030d1a 0%, #071628 100%);
 }
 
 .assembly-mode .appeal-title {
-    font-size: 26px;
+    font-size: 32px;
+    letter-spacing: -0.02em;
+}
+
+.assembly-mode .appeal-subtitle {
+    font-size: 14px;
 }
 
 .assembly-mode .header-controls {
@@ -409,34 +532,114 @@ body {
 }
 
 .assembly-mode .main-content {
-    padding: 32px 48px 48px;
-    max-width: 1200px;
+    padding: 28px 56px 56px;
+    max-width: 1440px;
 }
 
+/* Stats panel */
+
+.assembly-mode .assembly-panel {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+}
+
+/* Leaderboard */
+
 .assembly-mode .leaderboard {
-    gap: 8px;
+    gap: 10px;
 }
 
 .assembly-mode .leaderboard-item {
-    padding: 18px 24px 18px 20px;
+    padding: 20px 26px 20px 22px;
+    border-left-width: 4px;
 }
+
+/* Top 3 get more drama */
+
+.assembly-mode .leaderboard-item.gold {
+    padding: 26px 32px 26px 26px;
+    animation: gold-pulse 3s ease-in-out infinite;
+}
+
+/* On fire glow */
+
+.assembly-mode .leaderboard-item.on-fire {
+    animation: fire-glow 2s ease-in-out infinite;
+}
+
+.assembly-mode .leaderboard-item.gold.on-fire {
+    animation: fire-glow 2s ease-in-out infinite, gold-pulse 3s ease-in-out infinite;
+}
+
+/* Rank */
 
 .assembly-mode .rank {
-    font-size: 30px;
+    font-size: 38px;
+    width: 60px;
 }
 
+.assembly-mode .leaderboard-item.gold   .rank { font-size: 52px; }
+.assembly-mode .leaderboard-item.silver .rank,
+.assembly-mode .leaderboard-item.bronze .rank { font-size: 44px; }
+
+/* Group name */
+
 .assembly-mode .group-name {
-    font-size: 22px;
+    font-size: 24px;
+    font-weight: 700;
 }
+
+.assembly-mode .leaderboard-item.gold   .group-name { font-size: 32px; }
+.assembly-mode .leaderboard-item.silver .group-name,
+.assembly-mode .leaderboard-item.bronze .group-name { font-size: 28px; }
+
+/* Fire badge */
+
+.assembly-mode .fire-badge {
+    font-size: 22px;
+    animation: fire-bounce 1s ease-in-out infinite;
+}
+
+/* Year tag + rank change */
+
+.assembly-mode .year-tag {
+    font-size: 13px;
+}
+
+.assembly-mode .rank-change {
+    font-size: 12px;
+    padding: 2px 6px;
+}
+
+/* Count */
 
 .assembly-mode .box-count {
     font-size: 20px;
 }
 
-.assembly-mode .progress-track {
-    height: 7px;
-    margin-top: 10px;
+.assembly-mode .leaderboard-item.gold   .box-count { font-size: 26px; }
+.assembly-mode .leaderboard-item.silver .box-count,
+.assembly-mode .leaderboard-item.bronze .box-count { font-size: 23px; }
+
+.assembly-mode .gain-tag {
+    font-size: 13px;
+    padding: 2px 7px;
 }
+
+/* Progress bar */
+
+.assembly-mode .progress-track {
+    height: 8px;
+    margin-top: 12px;
+}
+
+.assembly-mode .leaderboard-item.gold .progress-track {
+    height: 10px;
+}
+
+/* Footer */
 
 .assembly-mode .site-footer {
     font-size: 13px;
