@@ -490,21 +490,6 @@ body {
     opacity: 0.3;
 }
 
-.btn-reset {
-    background: transparent;
-    border: none;
-    color: var(--text-dim);
-    font-family: inherit;
-    font-size: 12px;
-    cursor: pointer;
-    padding: 0;
-    transition: color 0.15s;
-}
-
-.btn-reset:hover {
-    color: var(--accent);
-}
-
 /* ============================================================
    Animations
 ============================================================ */
@@ -575,7 +560,7 @@ body {
     display: none !important;
 }
 
-/* ── Stats panel (left column) ──────────────────────── */
+/* ── Stats panel (left column) ────────────────────── */
 
 .assembly-mode .assembly-panel {
     display: flex;
@@ -608,7 +593,7 @@ body {
     margin-top: 3px;
 }
 
-/* ── Podium (center column) ──────────────────────── */
+/* ── Podium (center column) ────────────────────── */
 
 .assembly-mode .assembly-podium {
     flex: 1;
@@ -740,7 +725,7 @@ body {
     color: var(--bronze-light);
 }
 
-/* ── Rest list (right column) ──────────────────────── */
+/* ── Rest list (right column) ────────────────────── */
 
 .assembly-mode .assembly-rest {
     width: 215px;

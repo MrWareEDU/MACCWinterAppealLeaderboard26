@@ -298,7 +298,7 @@
 
         .sheet-columns {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 8px;
             margin: 12px 0;
         }
@@ -410,27 +410,29 @@
                 <ol>
                     <li>Click the <strong>+</strong> button at the bottom left of the Sheet to add a new tab</li>
                     <li>Double-click the new tab and rename it <strong>Leaderboard</strong></li>
-                    <li>In row 1, type these three headings exactly: <strong>Care Group</strong> (A1), <strong>Year Group</strong> (B1), <strong>Donations</strong> (C1)</li>
+                    <li>In row 1, type these four headings exactly: <strong>Care Group</strong> (A1), <strong>Year Group</strong> (B1), <strong>Donations</strong> (C1), <strong>Previous Total</strong> (D1)</li>
                     <li>From row 2 down, fill in column A with each care group name and column B with its year group — one row per group</li>
                 </ol>
 
                 <table class="table-example">
                     <thead>
-                        <tr><th>Care Group</th><th>Year Group</th><th>Donations</th></tr>
+                        <tr><th>Care Group</th><th>Year Group</th><th>Donations</th><th>Previous Total</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>07HRM1</td><td>Year 7</td><td><em>(formula)</em></td></tr>
-                        <tr><td>07HRM2</td><td>Year 7</td><td><em>(formula)</em></td></tr>
-                        <tr><td>08HRM1</td><td>Year 8</td><td><em>(formula)</em></td></tr>
-                        <tr><td>08HRM2</td><td>Year 8</td><td><em>(formula)</em></td></tr>
-                        <tr><td>09HRM1</td><td>Year 9</td><td><em>(formula)</em></td></tr>
+                        <tr><td>07HRM1</td><td>Year 7</td><td><em>(formula)</em></td><td><em>(formula)</em></td></tr>
+                        <tr><td>07HRM2</td><td>Year 7</td><td><em>(formula)</em></td><td><em>(formula)</em></td></tr>
+                        <tr><td>08HRM1</td><td>Year 8</td><td><em>(formula)</em></td><td><em>(formula)</em></td></tr>
+                        <tr><td>08HRM2</td><td>Year 8</td><td><em>(formula)</em></td><td><em>(formula)</em></td></tr>
+                        <tr><td>09HRM1</td><td>Year 9</td><td><em>(formula)</em></td><td><em>(formula)</em></td></tr>
                     </tbody>
                 </table>
 
-                <p>In cell <strong>C2</strong>, paste this formula exactly:</p>
+                <p>In cell <strong>C2</strong>, paste this formula to get the most recent donation total for that care group:</p>
                 <div class="code-block">=IFERROR(INDEX('Form responses'!D:D,MATCH(MAXIFS('Form responses'!A:A,'Form responses'!C:C,A2),'Form responses'!A:A,0)),0)</div>
-                <p>Then drag the formula down to fill C3, C4, and so on — one cell per care group row.</p>
-                <div class="note">Column B in <strong>Form responses</strong> is Email address, so Care Group is column C and the donation count is column D. The single quotes around the tab name are required because it contains a space. If no submission has been made yet for a care group, the formula shows 0.</div>
+                <p>In cell <strong>D2</strong>, paste this formula to get the <em>second</em> most recent submission (used by the leaderboard to show “On Fire” and “Biggest Jump” since the last count):</p>
+                <div class="code-block">=IFERROR(INDEX('Form responses'!D:D,MATCH(LARGE(FILTER('Form responses'!A:A,'Form responses'!C:C=A2),2),'Form responses'!A:A,0)),"")</div>
+                <p>Drag both formulas down to fill their columns — one cell per care group row.</p>
+                <div class="note">Column B in <strong>Form responses</strong> is Email address, so Care Group is column C and the donation count is column D. The single quotes around the tab name are required because it contains a space. If no submission has been made yet for a care group, column C shows 0 and column D is blank.</div>
             </div>
         </div>
 
