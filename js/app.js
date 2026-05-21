@@ -4,15 +4,13 @@
     // ── State ────────────────────────────────────────────
 
     const state = {
-        rows:          [],
-        prevRows:      [],
-        prevRanks:     {},
-        baselineRows:  [],   // snapshot set on first load or manual reset
-        baselineTime:  null,
-        onFire:        new Set(),
-        activeFilter:  'all',
-        lastUpdated:   null,
-        firstLoad:     true,
+        rows:         [],
+        prevRows:     [],
+        prevRanks:    {},
+        onFire:       new Set(),
+        activeFilter: 'all',
+        lastUpdated:  null,
+        firstLoad:    true,
     };
 
     // ── Data fetching ──────────────────────────────────────
@@ -67,11 +65,13 @@
             const careGroup = fields[0] || '';
             const yearGroup = fields[1] || '';
             const boxes     = parseInt(fields[2], 10);
+            const prevBoxes = parseInt(fields[3], 10);
             if (careGroup) {
                 rows.push({
                     careGroup,
                     yearGroup,
-                    boxes: isNaN(boxes) ? 0 : boxes,
+                    boxes:     isNaN(boxes) ? 0 : boxes,
+                    prevBoxes: isNaN(prevBoxes) ? null : prevBoxes,
                 });
             }
         }
@@ -134,26 +134,22 @@
         const leadingYear  = yearEntries.length ? yearEntries[0][0] : '—';
         const leadingTotal = yearEntries.length ? yearEntries[0][1] + ' donations' : '';
 
-        // On fire groups (gained since baseline)
+        // On fire groups (current total exceeds their previous submission)
         const fireGroups = Array.from(state.onFire);
         const fireCount  = fireGroups.length;
-        const sinceStr   = state.baselineTime
-            ? 'since ' + state.baselineTime.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })
-            : '';
         const fireDetail = fireGroups.length
             ? fireGroups.slice(0, 3).join(', ') + (fireGroups.length > 3 ? ' +' + (fireGroups.length - 3) + ' more' : '')
-            : sinceStr ? 'none ' + sinceStr : 'none yet';
+            : 'none since last count';
 
-        // Biggest jump since baseline
+        // Biggest jump from previous submission
         let biggestGroup = '—', biggestGain = 0, biggestDetail = '';
         rows.forEach(function (row) {
-            const base = state.baselineRows.find(function (r) { return r.careGroup === row.careGroup; });
-            if (base) {
-                const gain = row.boxes - base.boxes;
+            if (row.prevBoxes !== null) {
+                const gain = row.boxes - row.prevBoxes;
                 if (gain > biggestGain) {
                     biggestGain   = gain;
                     biggestGroup  = row.careGroup;
-                    biggestDetail = '+' + gain + (sinceStr ? ' ' + sinceStr : '');
+                    biggestDetail = '+' + gain + ' from last count';
                 }
             }
         });
@@ -231,8 +227,7 @@
                              : '';
             const isOnFire  = state.onFire.has(row.careGroup);
             const fireClass = isOnFire ? ' on-fire' : '';
-            const prevRow   = state.prevRows.find(function (r) { return r.careGroup === row.careGroup; });
-            const gain      = (prevRow && row.boxes > prevRow.boxes) ? row.boxes - prevRow.boxes : 0;
+            const gain      = (row.prevBoxes !== null && row.boxes > row.prevBoxes) ? row.boxes - row.prevBoxes : 0;
             const prevRank  = state.prevRanks[row.careGroup];
             const rankDelta = prevRank ? prevRank - row.rank : 0;
 
@@ -297,17 +292,10 @@
             prevRanked.forEach(function (r) { state.prevRanks[r.careGroup] = r.rank; });
             state.prevRows   = state.rows.slice();
 
-            // Set baseline on first load
-            if (state.firstLoad) {
-                state.baselineRows = rows.slice();
-                state.baselineTime = new Date();
-            }
-
-            // On fire = gained donations since the baseline snapshot
+            // On fire = current total exceeds previous submission
             state.onFire = new Set();
             rows.forEach(function (row) {
-                const base = state.baselineRows.find(function (r) { return r.careGroup === row.careGroup; });
-                if (base && row.boxes > base.boxes) {
+                if (row.prevBoxes !== null && row.boxes > row.prevBoxes) {
                     state.onFire.add(row.careGroup);
                 }
             });
@@ -355,8 +343,7 @@
             if (!row) return '';
             const isOnFire  = state.onFire.has(row.careGroup);
             const fireClass = isOnFire ? ' on-fire' : '';
-            const prevRow   = state.prevRows.find(function (r) { return r.careGroup === row.careGroup; });
-            const gain      = (prevRow && row.boxes > prevRow.boxes) ? row.boxes - prevRow.boxes : 0;
+            const gain      = (row.prevBoxes !== null && row.boxes > row.prevBoxes) ? row.boxes - row.prevBoxes : 0;
             const prevRank  = state.prevRanks[row.careGroup];
             const rankDelta = prevRank ? prevRank - row.rank : 0;
 
@@ -395,8 +382,7 @@
 
         el.innerHTML = rest.map(function (row) {
             const isOnFire  = state.onFire.has(row.careGroup);
-            const prevRow   = state.prevRows.find(function (r) { return r.careGroup === row.careGroup; });
-            const gain      = (prevRow && row.boxes > prevRow.boxes) ? row.boxes - prevRow.boxes : 0;
+            const gain      = (row.prevBoxes !== null && row.boxes > row.prevBoxes) ? row.boxes - row.prevBoxes : 0;
             const prevRank  = state.prevRanks[row.careGroup];
             const rankDelta = prevRank ? prevRank - row.rank : 0;
 
@@ -422,18 +408,6 @@
                 '</div>'
             );
         }).join('');
-    }
-
-    // ── Baseline reset ────────────────────────────────────
-
-    function resetBaseline() {
-        state.baselineRows = state.rows.slice();
-        state.baselineTime = new Date();
-        state.onFire       = new Set();
-        renderAssemblyPanel();
-        renderPodium();
-        renderAssemblyRest();
-        renderList();
     }
 
     // ── Assembly view ──────────────────────────────────────
@@ -482,16 +456,6 @@
     document.addEventListener('DOMContentLoaded', function () {
         renderHeader();
         initAssemblyButton();
-
-        const resetBtn = document.getElementById('btnResetBaseline');
-        if (resetBtn) {
-            resetBtn.addEventListener('click', function () {
-                resetBaseline();
-                resetBtn.textContent = 'Reset ✓';
-                setTimeout(function () { resetBtn.textContent = 'Reset baseline'; }, 1500);
-            });
-        }
-
         load();
         setInterval(load, CONFIG.REFRESH_INTERVAL * 1000);
     });
