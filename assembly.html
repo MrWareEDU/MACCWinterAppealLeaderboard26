@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assembly View — Winter Appeal Leaderboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/config.js"></script>
+</head>
+<body class="assembly-mode">
+    <div id="app">
+
+        <header class="site-header">
+            <div class="header-inner">
+                <div class="header-brand">
+                    <span class="school-name" id="schoolName"></span>
+                    <div>
+                        <h1 class="appeal-title" id="appealTitle"></h1>
+                        <p class="appeal-subtitle">Care Group Leaderboard</p>
+                    </div>
+                </div>
+                <a href="index.html" class="assembly-back-link">← Main View</a>
+            </div>
+        </header>
+
+        <main class="main-content">
+
+            <div id="loadingState" class="status-state">
+                <p>Loading leaderboard data...</p>
+            </div>
+
+            <div id="errorState" class="status-state status-error hidden">
+                <p>Could not load data. The leaderboard will retry shortly.</p>
+                <p class="error-detail" id="errorDetail"></p>
+            </div>
+
+            <div class="assembly-layout" id="assemblyLayout">
+                <div id="assemblyPanel" class="assembly-panel">
+                    <div class="stat-card stat-total">
+                        <div class="stat-value" id="statTotalVal">—</div>
+                        <div class="stat-label">Total Donations</div>
+                        <div class="stat-detail" id="statTotalDetail">school-wide</div>
+                    </div>
+                    <div class="stat-card stat-year">
+                        <div class="stat-value" id="statYearVal">—</div>
+                        <div class="stat-label">Leading Year</div>
+                        <div class="stat-detail" id="statYearDetail"></div>
+                    </div>
+                    <div class="stat-card stat-fire">
+                        <div class="stat-value" id="statFireVal">—</div>
+                        <div class="stat-label">🔥 On Fire</div>
+                        <div class="stat-detail" id="statFireDetail">groups that just donated</div>
+                    </div>
+                    <div class="stat-card stat-jump">
+                        <div class="stat-value" id="statJumpVal">—</div>
+                        <div class="stat-label">Biggest Jump</div>
+                        <div class="stat-detail" id="statJumpDetail"></div>
+                    </div>
+                </div>
+                <div class="assembly-podium" id="assemblyPodium"></div>
+                <div class="assembly-rest" id="assemblyRest"></div>
+            </div>
+
+        </main>
+
+        <footer class="site-footer">
+            <span id="lastUpdated"></span>
+            <span class="footer-sep">·</span>
+            <span>Refreshes every 30 seconds</span>
+        </footer>
+
+    </div>
+    <script src="js/assembly.js"></script>
+</body>
+</html>
