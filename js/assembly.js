@@ -4,13 +4,12 @@
     // ── State ────────────────────────────────────────────
 
     const state = {
-        rows:         [],
-        prevRows:     [],
-        prevRanks:    {},
-        onFire:       new Set(),
-        activeFilter: 'all',
-        lastUpdated:  null,
-        firstLoad:    true,
+        rows:        [],
+        prevRows:    [],
+        prevRanks:   {},
+        onFire:      new Set(),
+        lastUpdated: null,
+        firstLoad:   true,
     };
 
     // ── Data fetching ──────────────────────────────────────
@@ -94,27 +93,6 @@
         });
     }
 
-    // ── Filtering ──────────────────────────────────────────
-
-    function filteredRows() {
-        if (state.activeFilter === 'all') return state.rows;
-        return state.rows.filter(function (r) {
-            return r.yearGroup === state.activeFilter;
-        });
-    }
-
-    function yearGroups() {
-        const seen   = {};
-        const groups = [];
-        state.rows.forEach(function (r) {
-            if (r.yearGroup && !seen[r.yearGroup]) {
-                seen[r.yearGroup] = true;
-                groups.push(r.yearGroup);
-            }
-        });
-        return groups.sort();
-    }
-
     // ── Rendering ──────────────────────────────────────────
 
     function renderHeader() {
@@ -124,54 +102,66 @@
         if (title)  title.textContent  = 'Winter Appeal ' + CONFIG.APPEAL_YEAR;
     }
 
-    function renderFilters() {
-        const nav    = document.getElementById('yearFilters');
-        const groups = yearGroups();
+    function renderAssemblyPanel() {
+        const rows = state.rows;
 
-        if (groups.length <= 1) {
-            nav.innerHTML = '';
-            return;
+        const total = rows.reduce(function (s, r) { return s + r.boxes; }, 0);
+
+        const yearTotals = {};
+        rows.forEach(function (r) {
+            if (r.yearGroup) {
+                yearTotals[r.yearGroup] = (yearTotals[r.yearGroup] || 0) + r.boxes;
+            }
+        });
+        const yearEntries  = Object.entries(yearTotals).sort(function (a, b) { return b[1] - a[1]; });
+        const leadingYear  = yearEntries.length ? yearEntries[0][0] : '—';
+        const leadingTotal = yearEntries.length ? yearEntries[0][1] + ' donations' : '';
+
+        const fireGroups = Array.from(state.onFire);
+        const fireCount  = fireGroups.length;
+        const fireDetail = fireGroups.length
+            ? fireGroups.slice(0, 3).join(', ') + (fireGroups.length > 3 ? ' +' + (fireGroups.length - 3) + ' more' : '')
+            : 'none since last count';
+
+        let biggestGroup = '—', biggestGain = 0, biggestDetail = '';
+        rows.forEach(function (row) {
+            if (row.prevBoxes !== null) {
+                const gain = row.boxes - row.prevBoxes;
+                if (gain > biggestGain) {
+                    biggestGain   = gain;
+                    biggestGroup  = row.careGroup;
+                    biggestDetail = '+' + gain + ' from last count';
+                }
+            }
+        });
+
+        function set(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = val;
         }
 
-        const all = ['all'].concat(groups);
-        nav.innerHTML = all.map(function (g) {
-            const label  = g === 'all' ? 'All Years' : g;
-            const active = g === state.activeFilter ? ' active' : '';
-            return (
-                '<button class="filter-btn' + active + '" data-filter="' + g + '">' +
-                escapeHTML(label) +
-                '</button>'
-            );
-        }).join('');
-
-        nav.querySelectorAll('.filter-btn').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                state.activeFilter = btn.dataset.filter;
-                renderFilters();
-                renderList();
-            });
-        });
+        set('statTotalVal',    total);
+        set('statYearVal',     leadingYear);
+        set('statYearDetail',  leadingTotal);
+        set('statFireVal',     fireCount || '—');
+        set('statFireDetail',  fireDetail);
+        set('statJumpVal',     biggestGroup);
+        set('statJumpDetail',  biggestDetail);
     }
 
-    function renderList() {
-        const list = document.getElementById('leaderboardList');
-        const rows = rankRows(filteredRows());
+    function renderPodium() {
+        const el = document.getElementById('assemblyPodium');
+        if (!el) return;
+        const ranked = rankRows(state.rows);
+        const top3   = ranked.slice(0, 3);
 
-        if (rows.length === 0) {
-            list.innerHTML =
-                '<li class="leaderboard-empty">No data to display.</li>';
-            list.classList.remove('hidden');
-            return;
-        }
+        // Classic podium order: 2nd | 1st | 3rd
+        const order    = [top3[1], top3[0], top3[2]];
+        const posClass = ['pos-2', 'pos-1', 'pos-3'];
+        const medals   = ['🥈', '🥇', '🥉'];
 
-        const maxBoxes = rows[0].boxes || 1;
-
-        list.innerHTML = rows.map(function (row) {
-            const pct        = Math.max(2, Math.round((row.boxes / maxBoxes) * 100));
-            const medalClass = row.rank === 1 ? ' gold'
-                             : row.rank === 2 ? ' silver'
-                             : row.rank === 3 ? ' bronze'
-                             : '';
+        el.innerHTML = order.map(function (row, i) {
+            if (!row) return '';
             const isOnFire  = state.onFire.has(row.careGroup);
             const fireClass = isOnFire ? ' on-fire' : '';
             const gain      = (row.prevBoxes !== null && row.boxes > row.prevBoxes) ? row.boxes - row.prevBoxes : 0;
@@ -179,37 +169,64 @@
             const rankDelta = prevRank ? prevRank - row.rank : 0;
 
             return (
-                '<li class="leaderboard-item' + medalClass + fireClass + '">' +
-                    '<span class="rank">' + row.rank + '</span>' +
-                    '<div class="group-info">' +
-                        '<div class="group-name-row">' +
-                            '<span class="group-name">' + escapeHTML(row.careGroup) + '</span>' +
-                            (isOnFire ? '<span class="fire-badge">🔥</span>' : '') +
-                        '</div>' +
-                        '<div class="group-meta">' +
-                            (row.yearGroup
-                                ? '<span class="year-tag">' + escapeHTML(row.yearGroup) + '</span>'
-                                : '') +
-                            (rankDelta > 0
-                                ? '<span class="rank-change rank-up-ind">↑' + rankDelta + '</span>'
-                                : '') +
-                            (rankDelta < 0
-                                ? '<span class="rank-change rank-dn-ind">↓' + Math.abs(rankDelta) + '</span>'
-                                : '') +
-                        '</div>' +
+                '<div class="podium-block ' + posClass[i] + fireClass + '">' +
+                    '<div class="podium-medal">' + medals[i] + '</div>' +
+                    '<div class="podium-name">' +
+                        escapeHTML(row.careGroup) +
+                        (isOnFire ? '<span class="fire-badge">🔥</span>' : '') +
                     '</div>' +
-                    '<span class="box-count">' +
+                    (row.yearGroup
+                        ? '<div class="podium-year">' + escapeHTML(row.yearGroup) + '</div>'
+                        : '') +
+                    (rankDelta > 0
+                        ? '<div class="podium-rank-change rank-up-ind">↑' + rankDelta + ' place' + (rankDelta > 1 ? 's' : '') + '</div>'
+                        : '') +
+                    (rankDelta < 0
+                        ? '<div class="podium-rank-change rank-dn-ind">↓' + Math.abs(rankDelta) + ' place' + (Math.abs(rankDelta) > 1 ? 's' : '') + '</div>'
+                        : '') +
+                    '<div class="podium-count">' +
                         row.boxes + ' donation' + (row.boxes === 1 ? '' : 's') +
                         (gain > 0 ? '<span class="gain-tag">+' + gain + '</span>' : '') +
-                    '</span>' +
-                    '<div class="progress-track">' +
-                        '<div class="progress-fill" style="width:' + pct + '%"></div>' +
                     '</div>' +
-                '</li>'
+                '</div>'
             );
         }).join('');
+    }
 
-        list.classList.remove('hidden');
+    function renderAssemblyRest() {
+        const el = document.getElementById('assemblyRest');
+        if (!el) return;
+        const ranked = rankRows(state.rows);
+        const rest   = ranked.slice(3, 11);
+
+        el.innerHTML = rest.map(function (row) {
+            const isOnFire  = state.onFire.has(row.careGroup);
+            const gain      = (row.prevBoxes !== null && row.boxes > row.prevBoxes) ? row.boxes - row.prevBoxes : 0;
+            const prevRank  = state.prevRanks[row.careGroup];
+            const rankDelta = prevRank ? prevRank - row.rank : 0;
+
+            return (
+                '<div class="rest-item' + (isOnFire ? ' on-fire' : '') + '">' +
+                    '<span class="rest-rank">' + row.rank + '</span>' +
+                    '<div class="rest-info">' +
+                        '<span class="rest-name">' +
+                            escapeHTML(row.careGroup) +
+                            (isOnFire ? ' 🔥' : '') +
+                        '</span>' +
+                        (rankDelta > 0
+                            ? '<span class="rank-change rank-up-ind">↑' + rankDelta + '</span>'
+                            : '') +
+                        (rankDelta < 0
+                            ? '<span class="rank-change rank-dn-ind">↓' + Math.abs(rankDelta) + '</span>'
+                            : '') +
+                    '</div>' +
+                    '<span class="rest-count">' +
+                        row.boxes +
+                        (gain > 0 ? ' <span class="gain-tag">+' + gain + '</span>' : '') +
+                    '</span>' +
+                '</div>'
+            );
+        }).join('');
     }
 
     function renderLastUpdated() {
@@ -228,18 +245,15 @@
         const loadingEl = document.getElementById('loadingState');
         const errorEl   = document.getElementById('errorState');
         const detailEl  = document.getElementById('errorDetail');
-        const listEl    = document.getElementById('leaderboardList');
 
         try {
             const rows = await fetchData();
 
-            // Snapshot previous state before overwriting
             const prevRanked = rankRows(state.rows);
             state.prevRanks  = {};
             prevRanked.forEach(function (r) { state.prevRanks[r.careGroup] = r.rank; });
             state.prevRows   = state.rows.slice();
 
-            // On fire = current total exceeds previous submission
             state.onFire = new Set();
             rows.forEach(function (row) {
                 if (row.prevBoxes !== null && row.boxes > row.prevBoxes) {
@@ -256,16 +270,16 @@
             }
             errorEl.classList.add('hidden');
 
-            renderFilters();
-            renderList();
             renderLastUpdated();
+            renderAssemblyPanel();
+            renderPodium();
+            renderAssemblyRest();
 
         } catch (err) {
             if (state.firstLoad) {
                 loadingEl.classList.add('hidden');
                 errorEl.classList.remove('hidden');
                 if (detailEl) detailEl.textContent = err.message;
-                listEl.classList.add('hidden');
             }
         }
     }
